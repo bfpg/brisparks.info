@@ -27,3 +27,19 @@ CREATE TABLE adjoining_suburb (
   , suburb           VARCHAR(50)
   , adjoining_suburb VARCHAR(50) 
 );  
+
+INSERT INTO park_facility VALUES (
+  'D0001'
+  , 'QUANDONG PARK'
+  , '32423'
+  , 'RECREATION ACCESS'
+  , 'QUANDONG PK SHARED PATHWAY'
+  , '11882'
+  , 'ADVISORY SIGN'
+  , ''
+  , 'Shared pathway sign'
+  , '500106.05'
+  , '6965225.40'
+  , 1 
+  , 'POINT(153.0010731 -27.43642293)'
+);
