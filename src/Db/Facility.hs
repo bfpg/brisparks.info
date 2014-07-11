@@ -1,22 +1,24 @@
-{-# LANGUAGE FlexibleInstances, MultiParamTypeClasses,QuasiQuotes #-}
+{-# LANGUAGE FlexibleInstances, MultiParamTypeClasses,OverloadedStrings #-}
+{-# LANGUAGE QuasiQuotes #-}
 {-# LANGUAGE TemplateHaskell, TypeFamilies, TupleSections #-}
 module Db.Facility where
 
 import Control.Applicative ((<$>),(<*>))
 import Control.Error (headMay)
-import Control.Lens (_Wrapped,_Unwrapped,makeLenses,makeWrapped,(^.))
+import Control.Lens (_Wrapped,_Unwrapped,_Show,makeLenses,makeWrapped,(^.))
 import Control.Monad.Reader (ReaderT)
 import Data.Maybe (fromMaybe) 
 import Data.Text (Text)
 import Database.PostgreSQL.Simple (Connection)
 import Database.PostgreSQL.Simple.FromRow (FromRow,fromRow,field)
+import Database.PostgreSQL.Simple.ToRow (ToRow,toRow)
 import Database.PostgreSQL.Simple.ToField (ToField,toField)
 import Database.PostgreSQL.Simple.FromField (FromField,Conversion,fromField)
 import Database.PostgreSQL.Simple.SqlQQ (sql)
 
-import Snap.Snaplet.PostgresqlSimple (query)
+import Snap.Snaplet.PostgresqlSimple (Postgres,Only(Only),fromOnly,query)
 
-type Db = ReaderT Connection IO
+type Db = ReaderT Postgres IO
 
 -- Some lousy newtypes so we can clean up on the cassava side.
 newtype CsvInt    = CsvInt Int deriving (Eq,Show)
@@ -42,7 +44,7 @@ data Facility = Facility
 makeLenses ''Facility
 
 insertFacility :: Facility -> Db Int
-insertFacility f = fromMaybe 0 . headMay <$> (query
+insertFacility f = fromMaybe 0 . fmap fromOnly . headMay <$> query
   [sql|
    INSERT INTO park_facility (
      park_number,park_name,node_id,node_use,node_name,item_id,item_type,item_name,
@@ -50,23 +52,7 @@ insertFacility f = fromMaybe 0 . headMay <$> (query
    ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)
    RETURNING id
   |]
-  (
-    f ^. parkNumber
-    , f ^. parkName
-    , f ^. nodeId
-    , f ^. nodeUse
-    , f ^. nodeName
-    , f ^. itemId
-    , f ^. itemType
-    , f ^. itemName
-    , f ^. description
-    , f ^. easting
-    , f ^. northing
-    , f ^. origFid
-    , coordText 
-  ))
-  where 
-    coordText = show (f ^. coords)
+  f
 
 instance FromField CsvInt where
   fromField f bs = fmap (^. _Unwrapped) (fromField f bs :: Conversion Int)
@@ -95,3 +81,23 @@ instance FromRow Facility where
     <*> field 
     <*> field 
     <*> ((,) <$> field <*> field)
+
+instance ToRow Facility where
+  toRow f =
+    [ toField (f ^. parkNumber)
+    , toField (f ^. parkName)
+    , toField (f ^. nodeId)
+    , toField (f ^. nodeUse)
+    , toField (f ^. nodeName)
+    , toField (f ^. itemId)
+    , toField (f ^. itemType)
+    , toField (f ^. itemName)
+    , toField (f ^. description)
+    , toField (f ^. easting)
+    , toField (f ^. northing)
+    , toField (f ^. origFid)
+    , toField (coordText (f ^. coords))
+    ]
+    where
+      coordText :: (CsvDouble,CsvDouble) -> String
+      coordText (CsvDouble(long),CsvDouble(lat)) = "POINT(" ++ show long ++ " " ++ show lat ++ ")"

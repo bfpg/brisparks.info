@@ -25,6 +25,7 @@ Executable govhack-brissy-parks
     , lens                      >= 3.7.6   && < 4.2
     , MonadCatchIO-transformers >= 0.2.1   && < 0.4
     , mtl                       >= 2       && < 3
+    , resource-pool-catchio
     , snap                      >= 0.13    && < 0.14
     , snap-core                 >= 0.9     && < 0.11
     , snap-server               >= 0.9     && < 0.11

@@ -9,10 +9,13 @@ import qualified Data.ByteString.Char8 as BS8
 import qualified Data.ByteString.Lazy as LBS
 import Data.Csv (FromNamedRecord,ToNamedRecord,FromField,decodeByName,parseField
   ,encodeByName,namedRecord,parseNamedRecord,toNamedRecord,(.=),(.:))
+import Data.Pool (createPool)
 import Data.Vector (toList)
 import Data.Traversable (traverse)
-import Database.PostgreSQL.Simple (Connection)
+import Database.PostgreSQL.Simple (connectPostgreSQL,close,SqlError)
 import Db.Facility
+import Snap.Snaplet (loadAppConfig)
+import Snap.Snaplet.PostgresqlSimple (Postgres(..),getConnectionString)
 
 instance FromField CsvInt where
   parseField = fmap CsvInt . parseField . BS8.filter (/= ',')
@@ -38,11 +41,18 @@ instance FromNamedRecord Facility where
 
 main :: IO ()
 main = runScript $ do
-  c <- connectPostgreSQL "dbname='brissy_parks'" 
-  loadAndInsert c $ 1
-  loadAndInsert c $ 2
+  conf <- scriptIO $ loadAppConfig "devel.cfg" "."
+  pg   <- getPostgres conf 
+  loadAndInsert pg $ 1
+  loadAndInsert pg $ 2
 
-loadAndInsert :: Connection -> Int -> Script ()
+getPostgres conf = scriptIO $ do
+  s <- getConnectionString conf
+  print s --TODO: Not working. Fix tomorrow.
+  p <- createPool (connectPostgreSQL "dbname='brissy_parks'") close 1 10 1
+  return $ Postgres p
+
+loadAndInsert :: Postgres -> Int -> Script ()
 loadAndInsert conn i = do
   c <- loadCsv (filePath i)
   scriptIO . runReaderT (mapM_ insertFacility c) $ conn
