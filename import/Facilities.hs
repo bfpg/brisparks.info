@@ -9,6 +9,7 @@ import qualified Data.ByteString.Char8 as BS8
 import qualified Data.ByteString.Lazy as LBS
 import Data.Csv (FromNamedRecord,ToNamedRecord,FromField,decodeByName,parseField
   ,encodeByName,namedRecord,parseNamedRecord,toNamedRecord,(.=),(.:))
+import Data.Configurator (subconfig)
 import Data.Pool (createPool)
 import Data.Vector (toList)
 import Data.Traversable (traverse)
@@ -47,9 +48,8 @@ main = runScript $ do
   loadAndInsert pg $ 2
 
 getPostgres conf = scriptIO $ do
-  s <- getConnectionString conf
-  print s --TODO: Not working. Fix tomorrow.
-  p <- createPool (connectPostgreSQL "dbname='brissy_parks'") close 1 10 1
+  s <- getConnectionString . subconfig "postgresql-simple" $ conf
+  p <- createPool (connectPostgreSQL s) close 1 10 1
   return $ Postgres p
 
 loadAndInsert :: Postgres -> Int -> Script ()
