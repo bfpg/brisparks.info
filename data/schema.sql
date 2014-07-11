@@ -6,7 +6,8 @@ CREATE EXTENSION postgis_tiger_geocoder;
 DROP TABLE park_facility;
    
 CREATE TABLE park_facility (
-  park_number   VARCHAR(20)
+  id            SERIAL NOT NULL PRIMARY KEY
+  , park_number VARCHAR(20)
   , park_name   VARCHAR(20)
   , node_id     INTEGER
   , node_use    VARCHAR(100)
@@ -21,19 +22,8 @@ CREATE TABLE park_facility (
   , coords      GEOGRAPHY(Point)
 );
 
-
-INSERT INTO park_facility VALUES (
-  'D0001'
-  , 'QUANDONG PARK'
-  , '32423'
-  , 'RECREATION ACCESS'
-  , 'QUANDONG PK SHARED PATHWAY'
-  , '11882'
-  , 'ADVISORY SIGN'
-  , ''
-  , 'Shared pathway sign'
-  , '500106.05'
-  , '6965225.40'
-  , 1 
-  , 'POINT(153.0010731 -27.43642293)'
-);
+CREATE TABLE adjoining_suburb (
+  id                 SERIAL NOT NULL PRIMARY KEY
+  , suburb           VARCHAR(50)
+  , adjoining_suburb VARCHAR(50) 
+);  
