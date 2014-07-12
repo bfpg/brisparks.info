@@ -2,7 +2,11 @@
 {-# LANGUAGE QuasiQuotes #-}
 {-# LANGUAGE TypeFamilies, TupleSections #-}
 
-module KML where
+module KML
+  (
+    queryParkNos
+  , queryParkKML
+  ) where
 
 import Control.Applicative ((<$>),(<*>))
 import Control.Error (headMay)
@@ -30,8 +34,8 @@ queryParkNos = fmap fromOnly <$> query_
     FROM osm_park_ll
   |]
 
-queryParkKML :: Integer -> Db [T.Text]
-queryParkKML parkNo = fmap fromOnly <$> query
+queryParkKML :: Integer -> Db (Maybe T.Text)
+queryParkKML parkNo = (makeKML . fmap fromOnly) <$> query
   [sql|
     SELECT ST_AsKML(geom)
     FROM osm_park_ll
@@ -39,8 +43,9 @@ queryParkKML parkNo = fmap fromOnly <$> query
   |]
   (Only parkNo)
 
-makeKML :: [T.Text] -> T.Text
-makeKML ss = h `T.append` geoms `T.append` t
+makeKML :: [T.Text] -> Maybe T.Text
+makeKML [] = Nothing
+makeKML ss = Just $ T.concat [h, geoms, t]
   where
   h = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n\
       \<kml xmlns=\"http://www.opengis.net/kml/2.2\">\n\
