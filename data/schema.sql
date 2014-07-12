@@ -16,9 +16,9 @@ CREATE TABLE park_facility (
   , item_id     VARCHAR(50)
   , item_type   VARCHAR(50)
   , item_name   VARCHAR(100)
-  , description VARCHAR(255) 
-  , easting     NUMERIC(19,10)
-  , northing    NUMERIC(19,10)
+  , description VARCHAR(255)
+  , easting     FLOAT(53)
+  , northing    FLOAT(53)
   , orig_fid    INTEGER
   , coords      GEOGRAPHY(Point)
 );
