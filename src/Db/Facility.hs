@@ -63,6 +63,17 @@ queryParkIds = fmap fromOnly <$> query_
     FROM park_facility
   |]
 
+queryParkFacilities :: Text -> Db [Facility]
+queryParkFacilities parkId = query
+  [sql|
+    SELECT
+      park_number,park_name,node_id,node_use,node_name,item_id,item_type,item_name,
+      description,easting,northing,orig_fid,coords
+    FROM park_facility
+    WHERE park_number = ?
+  |]
+  (Only parkId)
+
 instance FromField CsvInt where
   fromField f bs = fmap (^. _Unwrapped) (fromField f bs :: Conversion Int)
 
