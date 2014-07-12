@@ -35,16 +35,16 @@ instance FromJSON CsvInt where
 newtype CsvDouble = CsvDouble Double deriving (Eq,Show)
 makeWrapped ''CsvDouble
 instance ToJSON CsvDouble where
-  toJSON = toJSON . (^. _Wrapped) 
+  toJSON = toJSON . (^. _Wrapped)
 instance FromJSON CsvDouble where
   parseJSON = fmap CsvDouble . parseJSON
 
 data Facility = Facility
-  { _parkNumber :: Text
+  { _parkNumber :: CsvInt
   , _parkName   :: Text
   , _nodeId     :: CsvInt
   , _nodeUse    :: Text
-  , _nodeName   :: Text 
+  , _nodeName   :: Text
   , _itemId     :: Text
   , _itemType   :: Text
   , _itemName   :: Text

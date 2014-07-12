@@ -10,7 +10,7 @@ DROP TABLE adjoining_suburb;
   
 CREATE TABLE park_facility (
   id            SERIAL NOT NULL PRIMARY KEY
-  , park_number VARCHAR(20)
+  , park_number INTEGER
   , park_name   VARCHAR(255)
   , node_id     INTEGER
   , node_use    VARCHAR(100)

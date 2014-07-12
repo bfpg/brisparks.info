@@ -7,6 +7,7 @@ import Control.Concurrent.Async (mapConcurrently)
 import Control.Error (Script,left,runScript,scriptIO)
 import Control.Monad.Reader (runReaderT)
 import qualified Data.ByteString.Char8 as BS8
+import Data.Char
 import Data.Csv (FromNamedRecord,ToNamedRecord,FromField,decodeByName,parseField
   ,encodeByName,namedRecord,parseNamedRecord,toNamedRecord,(.=),(.:))
 import Database.PostgreSQL.Simple (connectPostgreSQL,close,SqlError)
@@ -17,7 +18,7 @@ import Db.Facility
 import Internal
 
 instance FromField CsvInt where
-  parseField = fmap CsvInt . parseField . BS8.filter (/= ',')
+  parseField = fmap CsvInt . parseField . BS8.filter isDigit
 
 instance FromField CsvDouble where
   parseField = fmap CsvDouble . parseField . BS8.filter (/= ',')
