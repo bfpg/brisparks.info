@@ -60,3 +60,13 @@ representation.  The SRID is (hopefully) WGS84 (ref. 4326):
 Select some KML to confirm that it is working:
 
     psql# SELECT ST_AsKML(geom) from osm_park_ll limit 1;
+
+
+Development
+===========
+
+Compiling coffeescript to javascript on the fly:
+
+    % npm install grunt grunt-cli grunt-contrib-coffee \
+      grunt-contrib-watch
+    % node ./node_modules/grunt-cli/bin/grunt watch
