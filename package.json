@@ -1,0 +1,24 @@
+{
+    "name": "govhack-brissy-parks",
+    "version": "0.0.1",
+    "description": "GovHack Brisbane Parks web app",
+    "main": "Gruntfile.js",
+    "scripts": {
+	"test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "repository": {
+	"type": "git",
+	"url": "https://github.com/bfpg-govhack/govhack-brissy-parks.git"
+    },
+    "author": "Team Lambda",
+    "license": "MIT",
+    "bugs": {
+	"url": "https://github.com/bfpg-govhack/govhack-brissy-parks/issues"
+    },
+    "homepage": "https://github.com/bfpg-govhack/govhack-brissy-parks"
+    "dependencies" : {
+	"bower" : ">= 1.3",
+	"grunt" : ">= 0.4.5",
+	"grunt-cli" : ">= 0.1.13",
+    }
+}
