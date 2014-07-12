@@ -112,6 +112,9 @@ searchFacilityTerms searchText = query
   "SELECT term,type FROM park_facility_term WHERE term ILIKE ?"
   (Only $ T.concat ["%",searchText,"%"])
 
+parkFeatures :: Db [FacilityTerm]
+parkFeatures = query_
+  "SELECT term,type FROM park_facility_term WHERE type IN ('Facility Category','Facility')"
 
 searchFacility :: Text -> Db [(Int,Facility)]
 searchFacility searchText = fmap (\ ((Only i) :. f) -> (i,f)) <$> query
