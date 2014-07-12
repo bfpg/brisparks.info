@@ -9,6 +9,8 @@ import Control.Lens (_Wrapped,_Unwrapped,_Show,makeLenses,makeWrapped,(^.))
 import Control.Monad.Reader (ReaderT)
 import Data.Aeson (ToJSON,FromJSON,toJSON,parseJSON)
 import Data.Aeson.TH (deriveJSON)
+import Data.Char (isDigit)
+import Data.List.Split (splitWhen)
 import Data.Maybe (fromMaybe) 
 import Data.Text (Text)
 import qualified Data.Text as T
@@ -26,16 +28,16 @@ import Db.Internal
 newtype CsvInt    = CsvInt Int deriving (Eq,Show)
 makeWrapped ''CsvInt
 instance ToJSON CsvInt where
-  toJSON = undefined
+  toJSON = toJSON . (^. _Wrapped) 
 instance FromJSON CsvInt where
-  parseJSON = undefined
+  parseJSON = fmap CsvInt . parseJSON
   
 newtype CsvDouble = CsvDouble Double deriving (Eq,Show)
 makeWrapped ''CsvDouble
 instance ToJSON CsvDouble where
-  toJSON = undefined
+  toJSON = toJSON . (^. _Wrapped) 
 instance FromJSON CsvDouble where
-  parseJSON = undefined
+  parseJSON = fmap CsvDouble . parseJSON
 
 data Facility = Facility
   { _parkNumber :: Text
@@ -70,7 +72,7 @@ insertFacility f = fromMaybe 0 . fmap fromOnly . headMay <$> query
   [sql|
    INSERT INTO park_facility (
      park_number,park_name,node_id,node_use,node_name,item_id,item_type,item_name,
-     description,easting,northing,orig_fid,coords
+     description,easting,northing,orig_fid,ST_AsText(coords)
    ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)
    RETURNING id
   |]
@@ -88,7 +90,7 @@ queryParkFacilities parkId = query
   [sql|
     SELECT
       park_number,park_name,node_id,node_use,node_name,item_id,item_type,item_name,
-      description,easting,northing,orig_fid,coords
+      description,easting,northing,orig_fid,ST_AsText(coords)
     FROM park_facility
     WHERE park_number = ?
   |]
@@ -116,7 +118,7 @@ searchFacility searchText = fmap (\ ((Only i) :. f) -> (i,f)) <$> query
    [sql|
      SELECT
        id, park_number,park_name,node_id,node_use,node_name,item_id,item_type,item_name,
-       description,easting,northing,orig_fid,coords
+       description,easting,northing,orig_fid,ST_AsText(coords)
      FROM park_facility
      WHERE park_name ILIKE ? OR node_use ILIKE ? OR item_type ILIKE ?
      |]
@@ -150,7 +152,12 @@ instance FromRow Facility where
     <*> field 
     <*> field 
     <*> field 
-    <*> ((,) <$> field <*> field)
+    <*> (parseCoords <$> field)
+    where
+       parseCoords = toTuple . filter (not . null) . splitWhen notDecimal . T.unpack 
+       notDecimal c = not (isDigit c || c == '.')
+       toTuple [long,lat] = (CsvDouble $ read long,CsvDouble $ read lat)
+       toTuple _          = (CsvDouble 0,CsvDouble 0)
 
 instance FromRow FacilityTerm where
   fromRow = FacilityTerm
