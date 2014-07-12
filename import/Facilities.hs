@@ -1,4 +1,4 @@
-{-# LANGUAGE OverloadedLists, OverloadedStrings, TupleSections #-}
+{-# LANGUAGE OverloadedStrings, TupleSections #-}
 
 import Control.Applicative ((<$>),(<*>))
 import Control.Error (Script,left,runScript,scriptIO)
