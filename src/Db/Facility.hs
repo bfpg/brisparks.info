@@ -17,7 +17,7 @@ import Data.List.Split (splitWhen)
 import Data.Maybe (fromMaybe) 
 import Data.Text (Text)
 import qualified Data.Text as T
-import Data.Traversable (sequenceA)
+import Data.Traversable (sequenceA,traverse)
 import Database.PostgreSQL.Simple (Connection,(:.)(..))
 import Database.PostgreSQL.Simple.FromRow (FromRow,fromRow,field)
 import Database.PostgreSQL.Simple.ToRow (ToRow,toRow)
@@ -108,14 +108,17 @@ searchParkAdjoiningSuburbs st = query
     |]
   (Only $ searchTerm st)
 
-parkFeatures :: Text -> [Text] -> [Text] -> Db [(Text,Text)]
-parkFeatures st nodeUses itemTypes = fmap id <$> query
+parkFeatures :: Text -> [Text] -> [Text] -> Db [Text]
+parkFeatures st nodeUses itemTypes = nub . (explode =<<) <$> query
   [sql|
    SELECT DISTINCT node_use, item_type
-   FROM park_facility f LEFT JOIN park_address ON (f.park_number = a.park_number)
-   WHERE park_name ILIKE ? OR suburb ILIKE ?
+   FROM park_facility f LEFT JOIN park_address a ON (f.park_number = a.park_number)
+   WHERE f.park_name ILIKE ? OR suburb ILIKE ?
     |]
   (searchTerm st,searchTerm st)
+  where
+    explode :: (Text,Text) -> [Text]
+    explode (nu,it) = [nu,it] 
 
 searchFacility :: Text -> Db [(Int,Facility)]
 searchFacility st = fmap (\ ((Only i) :. f) -> (i,f)) <$> query
