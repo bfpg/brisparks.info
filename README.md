@@ -43,3 +43,20 @@ compile postgresql from ports with libstdc++:
     % pkg install postgresql92-contrib
 
 Compile `databases/postgis21` with the `RASTER` option enabled.
+
+
+Converting SHP to KML
+=====================
+
+Use `shp2pgsql` to add a table of the geometries to the database:
+
+    % shp2pgsql data/parks_shape_files/OSM_PARK_LL.shp | psql
+
+An SRID is needed to convert the PostGIS geometry to a KML
+representation.  The SRID is (hopefully) WGS84 (ref. 4326):
+
+    psql# SELECT UpdateGeometrySRID('osm_park_ll', 'geom', 4326);
+
+Select some KML to confirm that it is working:
+
+    psql# SELECT ST_AsKML(geom) from osm_park_ll limit 1;
