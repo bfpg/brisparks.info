@@ -24,6 +24,10 @@ Install dependencies and import all data:
   Importing the data may take a few minutes, depending on
   the speed of your computer.
 
+Install Javascript dependencies:
+
+    % npm install
+
 
 FreeBSD notes
 -------------
