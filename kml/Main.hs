@@ -13,7 +13,11 @@ import Snap.Snaplet.PostgresqlSimple (Postgres(..),getConnectionString)
 
 import Db.Facility
 
---import Geometry
+{-
+
+Convert all the geoms into kmls.
+
+-}
 
 main :: IO ()
 main = runScript $ do

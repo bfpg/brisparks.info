@@ -72,8 +72,8 @@ Executable import
   ghc-options: -threaded -O2
 
 
-Executable hull
-  hs-source-dirs: hull, src
+Executable kml
+  hs-source-dirs: kml, src
   main-is: Main.hs
 
   build-depends:
