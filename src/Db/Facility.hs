@@ -108,14 +108,14 @@ searchParkAdjoiningSuburbs st = query
     |]
   (Only $ searchTerm st)
 
---parkFeatures :: Text -> [Text] -> [Text] -> [Text]
---parkFeatures st nodeUses itemTypes = fmap id <$> query
---  [sql|
---   SELECT DISTINCT node_use, item_type
---   FROM park_facility f LEFT JOIN park_address ON (f.park_number = a.park_number)
---   WHERE park_name ILIKE ? OR suburb ILIKE ?
---    |]
---  (searchTerm st,searchTerm st)
+parkFeatures :: Text -> [Text] -> [Text] -> Db [(Text,Text)]
+parkFeatures st nodeUses itemTypes = fmap id <$> query
+  [sql|
+   SELECT DISTINCT node_use, item_type
+   FROM park_facility f LEFT JOIN park_address ON (f.park_number = a.park_number)
+   WHERE park_name ILIKE ? OR suburb ILIKE ?
+    |]
+  (searchTerm st,searchTerm st)
 
 searchFacility :: Text -> Db [(Int,Facility)]
 searchFacility st = fmap (\ ((Only i) :. f) -> (i,f)) <$> query

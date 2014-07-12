@@ -37,13 +37,13 @@ import KML
 handleApiSearchAc :: AppHandler ()
 handleApiSearchAc = do
   t <- acceptableSearch <$> getQueryParam "q"
-  res <- runDb $ maybe (return []) (searchShortList . T.decodeUtf8) t
+  res <- runDb $ maybe (return []) searchShortList t
   writeJSON res
 
 handleApiSearch :: AppHandler ()
 handleApiSearch = do
   t <- acceptableSearch <$> getQueryParam "q"
-  res <- runDb $ maybe (return []) (searchFacility . T.decodeUtf8) t
+  res <- runDb $ maybe (return []) searchFacility t
   writeJSON res
 
 handleApiKml :: AppHandler ()
@@ -56,7 +56,10 @@ handleApiKml = do
       >>= writeText
 
 handleApiFeatures :: AppHandler ()
-handleApiFeatures = undefined --runDb parkFeatures >>= writeJSON
+handleApiFeatures = do
+  t <- acceptableSearch <$> getQueryParam "q"
+  res <- runDb $ maybe (return []) (\ st -> parkFeatures st [] []) t
+  writeJSON res
 
 httpErrorJson :: Int -> BS.ByteString -> String -> AppHandler a
 httpErrorJson status statusMsg msg = do
@@ -75,8 +78,8 @@ handleSearchResults = render "_search_results"
 runDb :: Db a -> AppHandler a
 runDb d = with db getPostgresState >>= (liftIO . runReaderT d)
 
-acceptableSearch :: Maybe ByteString -> Maybe ByteString
-acceptableSearch = mfilter ((>= 3) . BS.length)
+acceptableSearch :: Maybe ByteString -> Maybe T.Text
+acceptableSearch = fmap T.decodeUtf8 . mfilter ((>= 3) . BS.length)
 
 ------------------------------------------------------------------------------
 -- | The application's routes.
