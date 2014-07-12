@@ -21,7 +21,7 @@ Executable app
   Build-depends:
     base                        >= 4.4       && < 5
     , aeson
-    , bytestring                == 0.10.4.0 
+    , bytestring                >= 0.10
     , configurator              > 0.2
     , heist                     >= 0.13    && < 0.14
     , lens                      >= 3.7.6   && < 4.2
@@ -31,7 +31,7 @@ Executable app
     , split
     , snap                      >= 0.13    && < 0.14
     , snap-core                 >= 0.9     && < 0.11
-    , snap-extras
+    , snap-extras               >= 0.9
     , snap-server               >= 0.9     && < 0.11
     , snap-loader-static        >= 0.9     && < 0.10
     , snaplet-postgresql-simple >= 0.5     && < 0.6
