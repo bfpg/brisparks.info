@@ -15,7 +15,7 @@ import Database.PostgreSQL.Simple.ToRow (ToRow,toRow)
 import Database.PostgreSQL.Simple.ToField (ToField,toField)
 import Database.PostgreSQL.Simple.FromField (FromField,Conversion,fromField)
 import Database.PostgreSQL.Simple.SqlQQ (sql)
-import Snap.Snaplet.PostgresqlSimple (Postgres,Only(Only),fromOnly,query,execute_)
+import Snap.Snaplet.PostgresqlSimple (Postgres,Only(Only),fromOnly,query,query_,execute_)
 
 import Db.Internal
 
@@ -55,6 +55,13 @@ insertFacility f = fromMaybe 0 . fmap fromOnly . headMay <$> query
    RETURNING id
   |]
   f
+
+queryParkIds :: Db [Text]
+queryParkIds = fmap fromOnly <$> query_
+  [sql|
+    SELECT DISTINCT park_number
+    FROM park_facility
+  |]
 
 instance FromField CsvInt where
   fromField f bs = fmap (^. _Unwrapped) (fromField f bs :: Conversion Int)
