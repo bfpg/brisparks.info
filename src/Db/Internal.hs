@@ -1,14 +1,6 @@
-{-# LANGUAGE GeneralizedNewtypeDeriving , OverloadedStrings #-}
+module Db.Internal where
 
-import Snap.Snaplet.PostgresqlSimple 
-  ( Postgres(..)
-  , HasPostgres
-  , FromRow
-  , fromRow
-  , getPostgresState
-  , getConnectionString
-  )
+import Control.Monad.Reader (ReaderT)
+import Snap.Snaplet.PostgresqlSimple (Postgres)
 
-newtype DbCache a = DbCache 
-  { unDbCache :: ReaderT DbCacheEnv IO a 
-  } deriving (Applicative,Functor,Monad,MonadReader DbCacheEnv,MonadIO)
+type Db = ReaderT Postgres IO

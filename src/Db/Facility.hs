@@ -15,10 +15,9 @@ import Database.PostgreSQL.Simple.ToRow (ToRow,toRow)
 import Database.PostgreSQL.Simple.ToField (ToField,toField)
 import Database.PostgreSQL.Simple.FromField (FromField,Conversion,fromField)
 import Database.PostgreSQL.Simple.SqlQQ (sql)
+import Snap.Snaplet.PostgresqlSimple (Postgres,Only(Only),fromOnly,query,execute_)
 
-import Snap.Snaplet.PostgresqlSimple (Postgres,Only(Only),fromOnly,query)
-
-type Db = ReaderT Postgres IO
+import Db.Internal
 
 -- Some lousy newtypes so we can clean up on the cassava side.
 newtype CsvInt    = CsvInt Int deriving (Eq,Show)
@@ -42,6 +41,9 @@ data Facility = Facility
   , _coords      :: (CsvDouble,CsvDouble)
   } deriving (Eq,Show)
 makeLenses ''Facility
+
+deleteFacilities :: Db ()
+deleteFacilities = execute_ "TRUNCATE park_facility" >> return ()
 
 insertFacility :: Facility -> Db Int
 insertFacility f = fromMaybe 0 . fmap fromOnly . headMay <$> query

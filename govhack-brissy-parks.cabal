@@ -53,10 +53,11 @@ Executable govhack-brissy-parks
 
 Executable import-facilities
   hs-source-dirs: import,src
-  main-is: Facilities.hs
+  main-is: Main.hs
 
   Build-depends:
     base                        >= 4.4       && < 5
+    , async
     , bytestring                >= 0.9.1   && < 0.11
     , cassava                   
     , configurator
@@ -66,3 +67,5 @@ Executable import-facilities
     , postgresql-simple  
     , vector
   
+
+  ghc-options: -threaded -O2
