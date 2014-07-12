@@ -2,6 +2,7 @@
 
 import Control.Monad
 import Control.Monad.Reader
+import qualified Data.Traversable as Tr
 
 import Control.Error (Script,runScript,scriptIO)
 import Data.Configurator (subconfig)
@@ -25,7 +26,7 @@ main = runScript $ do
   pg   <- scriptIO $ conf >>= getPostgres
   parkNos <- scriptIO $ runReaderT queryParkNos pg
   kml <- scriptIO $ runReaderT (queryParkKML $ head parkNos) pg
-  _ <- scriptIO $ T.putStrLn (makeKML kml)
+  _ <- scriptIO $ Tr.mapM T.putStrLn kml
   return ()
 
 conf :: IO Config

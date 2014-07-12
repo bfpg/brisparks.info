@@ -12,23 +12,27 @@ module Site
 import           Control.Applicative
 import           Control.Monad (mfilter)
 import           Control.Monad.Reader (runReaderT)
+import           Data.Aeson
 import           Data.ByteString (ByteString)
 import qualified Data.ByteString as BS
+import qualified Data.ByteString.Char8 as B8
 import           Data.Maybe (maybe)
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as T
-import           Snap  
+import           Safe
+import           Snap
 import           Snap.Extras.JSON (writeJSON)
 import           Snap.Snaplet.Heist
 import           Snap.Util.FileServe
 import           Heist
 import qualified Heist.Interpreted as I
-import           Snap.Snaplet.PostgresqlSimple (Postgres,pgsInit,getPostgresState)        
+import           Snap.Snaplet.PostgresqlSimple (Postgres,pgsInit,getPostgresState)
 ------------------------------------------------------------------------------
 import           Application
 
 import Db.Facility
 import Db.Internal
+import KML
 
 handleApiSearchAc :: AppHandler ()
 handleApiSearchAc = do
@@ -37,13 +41,33 @@ handleApiSearchAc = do
   writeJSON res
 
 handleApiSearch :: AppHandler ()
-handleApiSearch = do             
+handleApiSearch = do
   t <- acceptableSearch <$> getQueryParam "q"
   res <- runDb $ maybe (return []) (searchFacility . T.decodeUtf8) t
   writeJSON res
 
+handleApiKml :: AppHandler ()
+handleApiKml = do
+  parkId <- (>>= (readMay . B8.unpack)) <$> getParam "id"
+  case parkId of
+    Nothing -> httpErrorJson 400 "Bad Request" "expected integer id"
+    Just n -> runDb (queryParkKML n)
+      >>= require ("no kml for id " ++ show n)
+      >>= writeText
+
 handleApiFeatures :: AppHandler ()
-handleApiFeatures = runDb parkFeatures >>= writeJSON             
+handleApiFeatures = runDb parkFeatures >>= writeJSON
+
+httpErrorJson :: Int -> BS.ByteString -> String -> AppHandler a
+httpErrorJson status statusMsg msg = do
+  modifyResponse $ setResponseStatus status statusMsg
+  writeJSON (object ["errorMessage" .= msg])
+  getResponse >>= finishWith
+
+require :: String -> Maybe a -> AppHandler a
+require s x = case x of
+  Nothing -> httpErrorJson 404 "Not Found" "no kml for given id"
+  Just a -> return a
 
 handleSearchResults :: AppHandler ()
 handleSearchResults = render "_search_results"
@@ -58,9 +82,10 @@ acceptableSearch = mfilter ((>= 3) . BS.length)
 -- | The application's routes.
 routes :: [(ByteString, Handler App App ())]
 routes =
-  [ ("/api/search_ac", handleApiSearchAc)  
-  , ("/api/search"   , handleApiSearch)  
+  [ ("/api/search_ac", handleApiSearchAc)
+  , ("/api/search"   , handleApiSearch)
   , ("/api/features" , handleApiFeatures)
+  , ("/api/kml/:id"  , handleApiKml)
   , ("/results"      , handleSearchResults)
   , (""              , serveDirectory "static")
   ]
@@ -73,4 +98,3 @@ app = makeSnaplet "app" "An snaplet example application." Nothing $ do
     d <- nestSnaplet "db" db pgsInit
     addRoutes routes
     return $ App h d
-
