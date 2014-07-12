@@ -20,15 +20,17 @@
     </div>
   
     
-    <div class="col-md-4 col-md-offset-4 column">
+    <div class="col-md-4 col-md-offset-4 column clearfix">
       
-      <form> <!-- Basic Text Area Search Form -->
-	<div class="input-group">
+      <form class="form-horizontal center-block"> <!-- Basic Text Area Search Form -->
+        <div class="form-group">
 	  <input type="text" class="form-control input-lg" id="searchInput">
-	  <span class="input-group-btn">
-	    <button class="btn btn-default btn-lg" type="submit" id="searchButton">Where?</button>
-	  </span>
-	</div>
+        </div>
+        <div class="form-group">
+	  <button class="btn-default btn-lg" type="button" id="searchButton">
+            Let's Find Some Fun!
+          </button>
+        </div>
       </form>
       
     </div>
