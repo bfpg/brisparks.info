@@ -36,9 +36,9 @@ import KML
 
 handleApiSearchAc :: AppHandler ()
 handleApiSearchAc = do
-  t <- getQueryParam "q"
-  --res <- runDb $ maybe (return []) (searchFacilityTerms . T.decodeUtf8) t
-  writeJSON []
+  t <- acceptableSearch <$> getQueryParam "q"
+  res <- runDb $ maybe (return []) (searchShortList . T.decodeUtf8) t
+  writeJSON res
 
 handleApiSearch :: AppHandler ()
 handleApiSearch = do

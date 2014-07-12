@@ -9,11 +9,15 @@ import Control.Lens (_Wrapped,_Unwrapped,_Show,makeLenses,makeWrapped,(^.))
 import Control.Monad.Reader (ReaderT)
 import Data.Aeson (ToJSON,FromJSON,toJSON,parseJSON)
 import Data.Aeson.TH (deriveJSON)
+import Data.Bifunctor (first)
 import Data.Char (isDigit)
+import Data.Foldable(fold)
+import Data.List (nub)
 import Data.List.Split (splitWhen)
 import Data.Maybe (fromMaybe) 
 import Data.Text (Text)
 import qualified Data.Text as T
+import Data.Traversable (sequenceA)
 import Database.PostgreSQL.Simple (Connection,(:.)(..))
 import Database.PostgreSQL.Simple.FromRow (FromRow,fromRow,field)
 import Database.PostgreSQL.Simple.ToRow (ToRow,toRow)
@@ -75,28 +79,43 @@ queryParkFacilities parkId = query
   (Only parkId)
 
 searchShortList :: Text -> Db [(Text,Text)]
-searchShortList st = undefined
+searchShortList st = do
+  ps <- map ("Park",) <$> searchParkNames st
+  ss <- map ("Suburb",) <$> searchParkSuburbs st
+  -- TODO: Probably a bad idea that it goes ahead and does this regardless
+  -- Of how many things we've found already
+  as <- map (first (T.append "Suburb nearby to: ")) <$> searchParkAdjoiningSuburbs st
+  return . nub $ ps ++ ss ++ as
 
 searchParkNames :: Text -> Db [Text]
 searchParkNames st = fmap fromOnly <$> query
-  "SELECT park_name FROM park_facility WHERE park_name ILIKE ?"
+  "SELECT DISTINCT park_name FROM park_facility WHERE park_name ILIKE ?"
   (Only $ searchTerm st)
 
 searchParkSuburbs :: Text -> Db [Text]    
 searchParkSuburbs st = fmap fromOnly <$> query
-  "SELECT suburb FROM park_address WHERE park_address ILIKE ?"
+  "SELECT DISTINCT suburb FROM park_address WHERE suburb ILIKE ?"
   (Only $ searchTerm st)
 
-searchParkAdjoiningSuburbs :: Text -> Db [Text]
-searchParkAdjoiningSuburbs st = fmap fromOnly <$> query
+-- TODO: This is shit. Could just condense this into searchSuburb.
+searchParkAdjoiningSuburbs :: Text -> Db [(Text,Text)]
+searchParkAdjoiningSuburbs st = query
   [sql|
-    SELECT adjoining_suburb
-    FROM park_address pa1
-    JOIN adjoining_suburb aj ON (pa1.suburb = aj.suburb)
-    JOIN park_address pa2 ON (aj.adjoining_suburb
-    WHERE park_address ILIKE ?
+    SELECT DISTINCT aj.suburb,adjoining_suburb
+    adjoining_suburb aj 
+    JOIN park_address pa2 ON (UPPER(aj.adjoining_suburb) = pa2.suburb)
+    WHERE aj.suburb ILIKE ?
     |]
   (Only $ searchTerm st)
+
+--parkFeatures :: Text -> [Text] -> [Text] -> [Text]
+--parkFeatures st nodeUses itemTypes = fmap id <$> query
+--  [sql|
+--   SELECT DISTINCT node_use, item_type
+--   FROM park_facility f LEFT JOIN park_address ON (f.park_number = a.park_number)
+--   WHERE park_name ILIKE ? OR suburb ILIKE ?
+--    |]
+--  (searchTerm st,searchTerm st)
 
 searchFacility :: Text -> Db [(Int,Facility)]
 searchFacility st = fmap (\ ((Only i) :. f) -> (i,f)) <$> query

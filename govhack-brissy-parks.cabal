@@ -21,6 +21,7 @@ Executable app
   Build-depends:
     base                        >= 4.4       && < 5
     , aeson
+    , bifunctors
     , bytestring                >= 0.10
     , configurator              > 0.2
     , heist                     >= 0.13    && < 0.14
@@ -63,6 +64,7 @@ Executable import
   Build-depends:
     base                        >= 4.4       && < 5
     , async
+    , bifunctors
     , bytestring                >= 0.9.1   && < 0.11
     , cassava                   
     , configurator
