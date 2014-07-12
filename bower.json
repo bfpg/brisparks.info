@@ -1,0 +1,20 @@
+{
+  "name": "govhack-brissy-parks",
+  "version": "0.0.1",
+  "homepage": "https://github.com/bfpg-govhack/govhack-brissy-parks",
+  "authors": [
+    "Team Lambda"
+  ],
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "purescript-jquery": "*"
+  }
+}
