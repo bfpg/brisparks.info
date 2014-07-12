@@ -72,7 +72,7 @@ insertFacility f = fromMaybe 0 . fmap fromOnly . headMay <$> query
   [sql|
    INSERT INTO park_facility (
      park_number,park_name,node_id,node_use,node_name,item_id,item_type,item_name,
-     description,easting,northing,orig_fid,ST_AsText(coords)
+     description,easting,northing,orig_fid,coords   
    ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)
    RETURNING id
   |]
