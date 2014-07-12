@@ -50,20 +50,24 @@ handleApiKml :: AppHandler ()
 handleApiKml = do
   parkId <- (>>= (readMay . B8.unpack)) <$> getParam "id"
   case parkId of
-    Nothing -> do
-      modifyResponse $ setResponseStatus 400 "Bad Request"
-      writeJSON (object ["errorMessage" .= ("expected integer id" :: String)])
-      getResponse >>= finishWith
-    Just n -> runDb (queryParkKML n) >>= \t -> case t of
-      Nothing -> do
-        modifyResponse $ setResponseStatus 404 "Not Found"
-        writeJSON (object ["errorMessage" .= ("no kml for given id" :: String)])
-        getResponse >>= finishWith
-      Just t' -> writeText t'
-
+    Nothing -> httpErrorJson 400 "Bad Request" "expected integer id"
+    Just n -> runDb (queryParkKML n)
+      >>= require ("no kml for id " ++ show n)
+      >>= writeText
 
 handleApiFeatures :: AppHandler ()
-handleApiFeatures = runDb parkFeatures >>= writeJSON             
+handleApiFeatures = runDb parkFeatures >>= writeJSON
+
+httpErrorJson :: Int -> BS.ByteString -> String -> AppHandler a
+httpErrorJson status statusMsg msg = do
+  modifyResponse $ setResponseStatus status statusMsg
+  writeJSON (object ["errorMessage" .= msg])
+  getResponse >>= finishWith
+
+require :: String -> Maybe a -> AppHandler a
+require s x = case x of
+  Nothing -> httpErrorJson 404 "Not Found" "no kml for given id"
+  Just a -> return a
 
 runDb :: Db a -> AppHandler a
 runDb d = with db getPostgresState >>= (liftIO . runReaderT d)
