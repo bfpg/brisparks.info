@@ -1,18 +1,22 @@
 $().ready ->
 
-        homeUri = 'https://0.0.0.0:8000'
-        
-        searchValue = () ->
-                $(searchInput).val()
-        
-        submitSearch = () ->
-                $.get homeUri
-                
-        searchButton = $ '#searchButton'
+        searchAC = (q)->
+                '/api/search_ac?q=' + q
+
         searchInput = $ '#searchInput'
 
-        searchButton.on "click", (e) ->
-                console.log 
-                e.preventDefault()
+        dataSource = (q, cb) ->
+                $.get(searchAC(q)).done (data) ->
+                        cb( _.map data, (i) ->
+                                { value: i._term }
+                        )
                 return
 
+        searchInput.typeahead {
+                minLength: 3
+                highlight: true
+                },
+                {
+                source: dataSource
+                name: "park-kw",
+                }

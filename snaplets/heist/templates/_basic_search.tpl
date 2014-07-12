@@ -4,26 +4,21 @@
       <h1 class="text-center">Fun Finder</h1>
     </div>
   </div>
-  <div class="row clearfix">
     
     <div class="col-md-4 column">
       
-      <h2>Content Left</h2>
-      <p>
-      </p>
+      <h2>Park Features</h2>
+      Click or drag these features to the search area.
       
     </div>
 
     <div class="col-md-4 col-md-offset-4 column">
       
-      <h2>Content Right</h2>
-      <p>
-      </p>
+      <h2>Other Things</h2>
+      When do you want to visit the park?
       
     </div>
-  </div>
   
-  <div class="row clearfix">
     
     <div class="col-md-4 col-md-offset-4 column">
       
@@ -31,11 +26,11 @@
 	<div class="input-group">
 	  <input type="text" class="form-control input-lg" id="searchInput">
 	  <span class="input-group-btn">
-	    <button class="btn btn-default btn-lg" type="submit" id="searchButton">Search</button>
+	    <button class="btn btn-default btn-lg" type="submit" id="searchButton">Where?</button>
 	  </span>
 	</div>
       </form>
       
     </div>
-  </div>
+
 </div>

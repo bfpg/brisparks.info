@@ -1,18 +1,25 @@
 (function() {
   $().ready(function() {
-    var homeUri, searchButton, searchInput, searchValue, submitSearch;
-    homeUri = 'https://0.0.0.0:8000';
-    searchValue = function() {
-      return $(searchInput).val();
+    var dataSource, searchAC, searchInput;
+    searchAC = function(q) {
+      return '/api/search_ac?q=' + q;
     };
-    submitSearch = function() {
-      return $.get(homeUri);
-    };
-    searchButton = $('#searchButton');
     searchInput = $('#searchInput');
-    return searchButton.on("click", function(e) {
-      console.log;
-      e.preventDefault();
+    dataSource = function(q, cb) {
+      $.get(searchAC(q)).done(function(data) {
+        return cb(_.map(data, function(i) {
+          return {
+            value: i._term
+          };
+        }));
+      });
+    };
+    return searchInput.typeahead({
+      minLength: 3,
+      highlight: true
+    }, {
+      source: dataSource,
+      name: "park-kw"
     });
   });
 
