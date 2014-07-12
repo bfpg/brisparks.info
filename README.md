@@ -9,29 +9,33 @@ The DB dump was generated with the following command:
 Setup
 =====
 
-1. Create database and apply schema:
+Create database and apply schema:
 
     % export PGDATABASE=brissy_parks
     % createdb $PGDATABASE
     % psql < ./data/schema.sql
 
-2. Import all data:
+Install dependencies and import all data:
 
-    % cabal run import-facilities
+    % cabal sandbox init
+    % cabal install --only-dep
+    % cabal run import
 
-3. ???
-
-4. Profit!
+  Importing the data may take a few minutes, depending on
+  the speed of your computer.
 
 
 FreeBSD notes
 -------------
 
-postgis21 port/pkg is broken.  To get it working:
-
-- compile postgresql from ports with libstdc++:
+The `postgis21` the port is broken.  To get it working,
+compile postgresql from ports with libstdc++:
 
     % cd /usr/ports/databases/postgresql92-server
     % LDFLAGS=-lstdc++ make install
 
-- compile postgis from ports with `RASTER` option enabled.
+`postgresql92-contrib` is also needed:
+
+    % pkg install postgresql92-contrib
+
+Compile `databases/postgis21` with the `RASTER` option enabled.
