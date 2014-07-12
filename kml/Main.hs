@@ -6,12 +6,13 @@ import Control.Monad.Reader
 import Control.Error (Script,runScript,scriptIO)
 import Data.Configurator (subconfig)
 import Data.Configurator.Types (Config)
+import qualified Data.Text.IO as T
 import Data.Pool (createPool)
 import Database.PostgreSQL.Simple (connectPostgreSQL,close)
 import Snap.Snaplet (loadAppConfig)
 import Snap.Snaplet.PostgresqlSimple (Postgres(..),getConnectionString)
 
-import Db.Facility
+import KML
 
 {-
 
@@ -22,8 +23,9 @@ Convert all the geoms into kmls.
 main :: IO ()
 main = runScript $ do
   pg   <- scriptIO $ conf >>= getPostgres
-  parkIds <- scriptIO $ runReaderT queryParkIds pg
-  parkFacilities <- scriptIO $ runReaderT (queryParkFacilities $ head parkIds) pg
+  parkNos <- scriptIO $ runReaderT queryParkNos pg
+  kml <- scriptIO $ runReaderT (queryParkKML $ head parkNos) pg
+  _ <- scriptIO $ T.putStrLn (makeKML kml)
   return ()
 
 conf :: IO Config
