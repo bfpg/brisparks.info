@@ -10,79 +10,59 @@ module Site
 
 ------------------------------------------------------------------------------
 import           Control.Applicative
+import           Control.Monad (mfilter)
+import           Control.Monad.Reader (runReaderT)
 import           Data.ByteString (ByteString)
+import qualified Data.ByteString as BS
+import           Data.Maybe (maybe)
 import qualified Data.Text as T
-import           Snap.Core
-import           Snap.Snaplet
-import           Snap.Snaplet.Auth
-import           Snap.Snaplet.Auth.Backends.JsonFile
+import qualified Data.Text.Encoding as T
+import           Snap  
+import           Snap.Extras.JSON (writeJSON)
 import           Snap.Snaplet.Heist
-import           Snap.Snaplet.Session.Backends.CookieSession
 import           Snap.Util.FileServe
 import           Heist
 import qualified Heist.Interpreted as I
+import           Snap.Snaplet.PostgresqlSimple (Postgres,pgsInit,getPostgresState)        
 ------------------------------------------------------------------------------
 import           Application
 
+import Db.Facility
+import Db.Internal
 
-------------------------------------------------------------------------------
--- | Render login form
-handleLogin :: Maybe T.Text -> Handler App (AuthManager App) ()
-handleLogin authError = heistLocal (I.bindSplices errs) $ render "login"
-  where
-    errs = maybe noSplices splice authError
-    splice err = "loginError" ## I.textSplice err
+handleApiSearchAc :: AppHandler ()
+handleApiSearchAc = do
+  t <- getQueryParam "q"
+  res <- runDb $ maybe (return []) (searchFacilityTerms . T.decodeUtf8) t
+  writeJSON res
 
+handleApiSearch :: AppHandler ()
+handleApiSearch = do             
+  t <- acceptableSearch <$> getQueryParam "q"
+  res <- runDb $ maybe (return []) (searchFacility . T.decodeUtf8) t
+  writeJSON res
 
-------------------------------------------------------------------------------
--- | Handle login submit
-handleLoginSubmit :: Handler App (AuthManager App) ()
-handleLoginSubmit =
-    loginUser "login" "password" Nothing
-              (\_ -> handleLogin err) (redirect "/")
-  where
-    err = Just "Unknown user or password"
+runDb :: Db a -> AppHandler a
+runDb d = with db getPostgresState >>= (liftIO . runReaderT d)
 
-
-------------------------------------------------------------------------------
--- | Logs out and redirects the user to the site index.
-handleLogout :: Handler App (AuthManager App) ()
-handleLogout = logout >> redirect "/"
-
-
-------------------------------------------------------------------------------
--- | Handle new user form submit
-handleNewUser :: Handler App (AuthManager App) ()
-handleNewUser = method GET handleForm <|> method POST handleFormSubmit
-  where
-    handleForm = render "new_user"
-    handleFormSubmit = registerUser "login" "password" >> redirect "/"
-
+acceptableSearch :: Maybe ByteString -> Maybe ByteString
+acceptableSearch = mfilter ((>= 3) . BS.length)
 
 ------------------------------------------------------------------------------
 -- | The application's routes.
 routes :: [(ByteString, Handler App App ())]
-routes = [ ("/login",    with auth handleLoginSubmit)
-         , ("/logout",   with auth handleLogout)
-         , ("/new_user", with auth handleNewUser)
-         , ("",          serveDirectory "static")
-         ]
-
+routes =
+  [ ("/api/search_ac", handleApiSearchAc)  
+  , ("/api/search"   , handleApiSearch)  
+  , (""              , serveDirectory "static")
+  ]
 
 ------------------------------------------------------------------------------
 -- | The application initializer.
 app :: SnapletInit App App
 app = makeSnaplet "app" "An snaplet example application." Nothing $ do
     h <- nestSnaplet "" heist $ heistInit "templates"
-    s <- nestSnaplet "sess" sess $
-           initCookieSessionManager "site_key.txt" "sess" (Just 3600)
-
-    -- NOTE: We're using initJsonFileAuthManager here because it's easy and
-    -- doesn't require any kind of database server to run.  In practice,
-    -- you'll probably want to change this to a more robust auth backend.
-    a <- nestSnaplet "auth" auth $
-           initJsonFileAuthManager defAuthSettings sess "users.json"
+    d <- nestSnaplet "db" db pgsInit
     addRoutes routes
-    addAuthSplices h auth
-    return $ App h s a
+    return $ App h d
 

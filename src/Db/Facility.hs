@@ -1,5 +1,5 @@
 {-# LANGUAGE FlexibleInstances, MultiParamTypeClasses,OverloadedStrings #-}
-{-# LANGUAGE QuasiQuotes #-}
+{-# LANGUAGE QuasiQuotes, TypeOperators #-}
 {-# LANGUAGE TemplateHaskell, TypeFamilies, TupleSections #-}
 module Db.Facility where
 
@@ -7,9 +7,12 @@ import Control.Applicative ((<$>),(<*>))
 import Control.Error (headMay)
 import Control.Lens (_Wrapped,_Unwrapped,_Show,makeLenses,makeWrapped,(^.))
 import Control.Monad.Reader (ReaderT)
+import Data.Aeson (ToJSON,FromJSON,toJSON,parseJSON)
+import Data.Aeson.TH (deriveJSON)
 import Data.Maybe (fromMaybe) 
 import Data.Text (Text)
-import Database.PostgreSQL.Simple (Connection)
+import qualified Data.Text as T
+import Database.PostgreSQL.Simple (Connection,(:.)(..))
 import Database.PostgreSQL.Simple.FromRow (FromRow,fromRow,field)
 import Database.PostgreSQL.Simple.ToRow (ToRow,toRow)
 import Database.PostgreSQL.Simple.ToField (ToField,toField)
@@ -22,8 +25,17 @@ import Db.Internal
 -- Some lousy newtypes so we can clean up on the cassava side.
 newtype CsvInt    = CsvInt Int deriving (Eq,Show)
 makeWrapped ''CsvInt
+instance ToJSON CsvInt where
+  toJSON = undefined
+instance FromJSON CsvInt where
+  parseJSON = undefined
+  
 newtype CsvDouble = CsvDouble Double deriving (Eq,Show)
 makeWrapped ''CsvDouble
+instance ToJSON CsvDouble where
+  toJSON = undefined
+instance FromJSON CsvDouble where
+  parseJSON = undefined
 
 data Facility = Facility
   { _parkNumber :: Text
@@ -41,6 +53,14 @@ data Facility = Facility
   , _coords      :: (CsvDouble,CsvDouble)
   } deriving (Eq,Show)
 makeLenses ''Facility
+deriveJSON (aesonThOptions Nothing) ''Facility
+
+data FacilityTerm = FacilityTerm
+  { _term :: Text
+  , _termType :: Text
+  } deriving (Eq,Show)
+makeLenses ''FacilityTerm
+deriveJSON (aesonThOptions Nothing) ''FacilityTerm
 
 deleteFacilities :: Db ()
 deleteFacilities = execute_ "TRUNCATE park_facility" >> return ()
@@ -74,6 +94,36 @@ queryParkFacilities parkId = query
   |]
   (Only parkId)
 
+updateFacilityTerms :: Db ()
+updateFacilityTerms = execute_ q >> return ()
+  where q = [sql|
+    INSERT INTO park_facility_term (term,type) (
+      SELECT DISTINCT park_name, 'Park' FROM park_facility
+      UNION
+      SELECT DISTINCT node_use, 'Facility Category' FROM park_facility
+      UNION
+      SELECT DISTINCT item_type, 'Facility' FROM park_facility
+    )|]
+
+searchFacilityTerms :: Text -> Db [FacilityTerm]
+searchFacilityTerms searchText = query
+  "SELECT term,type FROM park_facility_term WHERE term ILIKE ?"
+  (Only $ T.concat ["%",searchText,"%"])
+
+
+searchFacility :: Text -> Db [(Int,Facility)]
+searchFacility searchText = fmap (\ ((Only i) :. f) -> (i,f)) <$> query
+   [sql|
+     SELECT
+       id, park_number,park_name,node_id,node_use,node_name,item_id,item_type,item_name,
+       description,easting,northing,orig_fid,coords
+     FROM park_facility
+     WHERE park_name ILIKE ? OR node_use ILIKE ? OR item_type ILIKE ?
+     |]
+  (search,search,search)  
+   where
+     search = T.concat ["%",searchText,"%"]
+
 instance FromField CsvInt where
   fromField f bs = fmap (^. _Unwrapped) (fromField f bs :: Conversion Int)
 
@@ -102,6 +152,11 @@ instance FromRow Facility where
     <*> field 
     <*> ((,) <$> field <*> field)
 
+instance FromRow FacilityTerm where
+  fromRow = FacilityTerm
+    <$> field
+    <*> field
+    
 instance ToRow Facility where
   toRow f =
     [ toField (f ^. parkNumber)

@@ -12,11 +12,11 @@ import Snap.Snaplet.Heist
 import Snap.Snaplet.Auth
 import Snap.Snaplet.Session
 
+import Snap.Snaplet.PostgresqlSimple (Postgres)        
 ------------------------------------------------------------------------------
 data App = App
     { _heist :: Snaplet (Heist App)
-    , _sess :: Snaplet SessionManager
-    , _auth :: Snaplet (AuthManager App)
+    , _db    :: Snaplet Postgres
     }
 
 makeLenses ''App

@@ -42,6 +42,7 @@ importFacilities :: Postgres -> IO ()
 importFacilities pg = do
   runReaderT deleteFacilities pg 
   mapConcurrently (loadAndInsert pg) [1,2]
+  runReaderT updateFacilityTerms pg
   return ()
   
 loadAndInsert :: Postgres -> Int -> IO ()
