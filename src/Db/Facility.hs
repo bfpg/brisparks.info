@@ -24,21 +24,6 @@ import Snap.Snaplet.PostgresqlSimple (Postgres,Only(Only),fromOnly,query,query_,
 
 import Db.Internal
 
--- Some lousy newtypes so we can clean up on the cassava side.
-newtype CsvInt    = CsvInt Int deriving (Eq,Show)
-makeWrapped ''CsvInt
-instance ToJSON CsvInt where
-  toJSON = toJSON . (^. _Wrapped) 
-instance FromJSON CsvInt where
-  parseJSON = fmap CsvInt . parseJSON
-  
-newtype CsvDouble = CsvDouble Double deriving (Eq,Show)
-makeWrapped ''CsvDouble
-instance ToJSON CsvDouble where
-  toJSON = toJSON . (^. _Wrapped)
-instance FromJSON CsvDouble where
-  parseJSON = fmap CsvDouble . parseJSON
-
 data Facility = Facility
   { _parkNumber :: CsvInt
   , _parkName   :: Text
@@ -56,13 +41,6 @@ data Facility = Facility
   } deriving (Eq,Show)
 makeLenses ''Facility
 deriveJSON (aesonThOptions Nothing) ''Facility
-
-data FacilityTerm = FacilityTerm
-  { _term :: Text
-  , _termType :: Text
-  } deriving (Eq,Show)
-makeLenses ''FacilityTerm
-deriveJSON (aesonThOptions Nothing) ''FacilityTerm
 
 deleteFacilities :: Db ()
 deleteFacilities = execute_ "TRUNCATE park_facility" >> return ()
@@ -96,50 +74,50 @@ queryParkFacilities parkId = query
   |]
   (Only parkId)
 
-updateFacilityTerms :: Db ()
-updateFacilityTerms = execute_ q >> return ()
-  where q = [sql|
-    INSERT INTO park_facility_term (term,type) (
-      SELECT DISTINCT park_name, 'Park' FROM park_facility
-      UNION
-      SELECT DISTINCT node_use, 'Facility Category' FROM park_facility
-      UNION
-      SELECT DISTINCT item_type, 'Facility' FROM park_facility
-    )|]
+searchShortList :: Text -> Db [(Text,Text)]
+searchShortList st = undefined
 
-searchFacilityTerms :: Text -> Db [FacilityTerm]
-searchFacilityTerms searchText = query
-  "SELECT term,type FROM park_facility_term WHERE term ILIKE ?"
-  (Only $ T.concat ["%",searchText,"%"])
+searchParkNames :: Text -> Db [Text]
+searchParkNames st = fmap fromOnly <$> query
+  "SELECT park_name FROM park_facility WHERE park_name ILIKE ?"
+  (Only $ searchTerm st)
 
-parkFeatures :: Db [FacilityTerm]
-parkFeatures = query_
-  "SELECT term,type FROM park_facility_term WHERE type IN ('Facility Category','Facility')"
+searchParkSuburbs :: Text -> Db [Text]    
+searchParkSuburbs st = fmap fromOnly <$> query
+  "SELECT suburb FROM park_address WHERE park_address ILIKE ?"
+  (Only $ searchTerm st)
+
+searchParkAdjoiningSuburbs :: Text -> Db [Text]
+searchParkAdjoiningSuburbs st = fmap fromOnly <$> query
+  [sql|
+    SELECT adjoining_suburb
+    FROM park_address pa1
+    JOIN adjoining_suburb aj ON (pa1.suburb = aj.suburb)
+    JOIN park_address pa2 ON (aj.adjoining_suburb
+    WHERE park_address ILIKE ?
+    |]
+  (Only $ searchTerm st)
 
 searchFacility :: Text -> Db [(Int,Facility)]
-searchFacility searchText = fmap (\ ((Only i) :. f) -> (i,f)) <$> query
+searchFacility st = fmap (\ ((Only i) :. f) -> (i,f)) <$> query
    [sql|
-     SELECT
+     SELECT park_
        id, park_number,park_name,node_id,node_use,node_name,item_id,item_type,item_name,
        description,easting,northing,orig_fid,ST_AsText(coords)
-     FROM park_facility
-     WHERE park_name ILIKE ? OR node_use ILIKE ? OR item_type ILIKE ?
+     FROM park_facility f
+       LEFT JOIN park_address a ON (f.park_number = a.park_number)
+       LEFT JOIN ajoining_suburb
+     WHERE f.park_name ILIKE ? OR a.suburb ILIKE a OR 
+                                             ( 
+       (SELECT 1,* FROM park_facility WHERE park_name LIKE ?)
+       UNION
+       (SELECT 2,* FROM park_facility LEFT JOIN WHERE  LIKE ?)
+     )                                        
      |]
   (search,search,search)  
-   where
-     search = T.concat ["%",searchText,"%"]
+   where search =  searchTerm st
 
-instance FromField CsvInt where
-  fromField f bs = fmap (^. _Unwrapped) (fromField f bs :: Conversion Int)
-
-instance ToField CsvInt where
-  toField f = toField (f ^. _Wrapped :: Int)
-
-instance FromField CsvDouble where
-  fromField f bs = fmap (^. _Unwrapped) (fromField f bs :: Conversion Double)
-
-instance ToField CsvDouble where
-  toField f = toField (f ^. _Wrapped :: Double)
+searchTerm st = T.concat ["%",st,"%"]
 
 instance FromRow Facility where
   fromRow = Facility
@@ -162,11 +140,6 @@ instance FromRow Facility where
        toTuple [long,lat] = (CsvDouble $ read long,CsvDouble $ read lat)
        toTuple _          = (CsvDouble 0,CsvDouble 0)
 
-instance FromRow FacilityTerm where
-  fromRow = FacilityTerm
-    <$> field
-    <*> field
-    
 instance ToRow Facility where
   toRow f =
     [ toField (f ^. parkNumber)

@@ -14,14 +14,9 @@ import Database.PostgreSQL.Simple (connectPostgreSQL,close,SqlError)
 import Snap.Snaplet (loadAppConfig)
 import Snap.Snaplet.PostgresqlSimple (Postgres)
 
+import Db.Internal
 import Db.Facility
 import Internal
-
-instance FromField CsvInt where
-  parseField = fmap CsvInt . parseField . BS8.filter isDigit
-
-instance FromField CsvDouble where
-  parseField = fmap CsvDouble . parseField . BS8.filter (/= ',')
 
 instance FromNamedRecord Facility where
   parseNamedRecord m = Facility
@@ -43,7 +38,6 @@ importFacilities :: Postgres -> IO ()
 importFacilities pg = do
   runReaderT deleteFacilities pg 
   mapConcurrently (loadAndInsert pg) [1,2]
-  runReaderT updateFacilityTerms pg
   return ()
   
 loadAndInsert :: Postgres -> Int -> IO ()

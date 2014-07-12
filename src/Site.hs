@@ -37,8 +37,8 @@ import KML
 handleApiSearchAc :: AppHandler ()
 handleApiSearchAc = do
   t <- getQueryParam "q"
-  res <- runDb $ maybe (return []) (searchFacilityTerms . T.decodeUtf8) t
-  writeJSON res
+  --res <- runDb $ maybe (return []) (searchFacilityTerms . T.decodeUtf8) t
+  writeJSON []
 
 handleApiSearch :: AppHandler ()
 handleApiSearch = do
@@ -56,7 +56,7 @@ handleApiKml = do
       >>= writeText
 
 handleApiFeatures :: AppHandler ()
-handleApiFeatures = runDb parkFeatures >>= writeJSON
+handleApiFeatures = undefined --runDb parkFeatures >>= writeJSON
 
 httpErrorJson :: Int -> BS.ByteString -> String -> AppHandler a
 httpErrorJson status statusMsg msg = do

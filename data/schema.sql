@@ -1,11 +1,10 @@
-
 CREATE EXTENSION postgis;
 CREATE EXTENSION postgis_topology;
 CREATE EXTENSION fuzzystrmatch;
 CREATE EXTENSION postgis_tiger_geocoder;
 
 DROP TABLE park_facility;
-DROP TABLE park_facility_term;
+DROP TABLE park_address;  
 DROP TABLE adjoining_suburb;   
   
 CREATE TABLE park_facility (
@@ -25,13 +24,19 @@ CREATE TABLE park_facility (
   , coords      GEOGRAPHY(Point)
 );
 
-CREATE TABLE park_facility_term (
-  term VARCHAR(255) PRIMARY KEY
-  , type VARCHAR(25)
-);
-
 CREATE TABLE adjoining_suburb (
   id                 SERIAL NOT NULL PRIMARY KEY
   , suburb           VARCHAR(50)
   , adjoining_suburb VARCHAR(50) 
 );  
+
+CREATE TABLE park_address (
+  park_number INTEGER
+  , park_name VARCHAR(255)
+  , street VARCHAR(255)
+  , suburb VARCHAR(100)
+  , easting FLOAT(53) 
+  , northing FLOAT(53) 
+  , latitude FLOAT(53)
+  , longtitude FLOAT(53)
+);

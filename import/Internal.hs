@@ -1,10 +1,21 @@
 module Internal where
 
 import qualified Data.ByteString as BS
+import qualified Data.ByteString.Char8 as BS8
 import qualified Data.ByteString.Lazy as LBS
+import Data.Char (isDigit)
+import Data.Csv (FromField,parseField)
 import Data.Csv (FromNamedRecord,decodeByName)
 import Data.Vector (toList)
-                                                                      
+
+import Db.Internal
+
+instance FromField CsvInt where
+  parseField = fmap CsvInt . parseField . BS8.filter isDigit
+
+instance FromField CsvDouble where
+  parseField = fmap CsvDouble . parseField . BS8.filter (/= ',')
+
 loadCsv :: FromNamedRecord a => FilePath -> IO [a]
 loadCsv fn = do
   -- Loading strict because the lazy bytestring caused an EOF bug in cassava
