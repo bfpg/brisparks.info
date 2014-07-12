@@ -2,16 +2,15 @@ module.exports = function(grunt) {
     "use strict";
 
     var sourceFolders = [
-	"src/PureScript/**/*.purs",
 	"bower_components/**/src/**/*.purs",
-	"bower_components/**/src/**/*.purs.hs"
+	"bower_components/**/src/**/*.purs.hs",
+	"src/PureScript/**/*.purs"
     ];
 
     grunt.initConfig({
 	psc: {
 	    options: {
-		main: "Main",
-		modules: ["Main"]
+		main: "BrissyParks",
 	    },
 	    all: {
 		src: sourceFolders,
