@@ -45,6 +45,9 @@ handleApiSearch = do
 handleApiFeatures :: AppHandler ()
 handleApiFeatures = runDb parkFeatures >>= writeJSON             
 
+handleSearchResults :: AppHandler ()
+handleSearchResults = render "_search_results"
+
 runDb :: Db a -> AppHandler a
 runDb d = with db getPostgresState >>= (liftIO . runReaderT d)
 
@@ -57,7 +60,8 @@ routes :: [(ByteString, Handler App App ())]
 routes =
   [ ("/api/search_ac", handleApiSearchAc)  
   , ("/api/search"   , handleApiSearch)  
-  , ("/api/features" , handleApiFeatures)  
+  , ("/api/features" , handleApiFeatures)
+  , ("/results"      , handleSearchResults)
   , (""              , serveDirectory "static")
   ]
 
