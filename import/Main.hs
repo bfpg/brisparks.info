@@ -1,4 +1,4 @@
-{-# LANGUAGE OverloadedLists, OverloadedStrings, TupleSections #-}
+{-# LANGUAGE OverloadedStrings, TupleSections #-}
 module Main where
 
 import Control.Error (Script,runScript,scriptIO)
