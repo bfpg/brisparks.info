@@ -12,11 +12,14 @@ module Site
 import           Control.Applicative
 import           Control.Monad (mfilter)
 import           Control.Monad.Reader (runReaderT)
+import           Data.Aeson
 import           Data.ByteString (ByteString)
 import qualified Data.ByteString as BS
+import qualified Data.ByteString.Char8 as B8
 import           Data.Maybe (maybe)
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as T
+import           Safe
 import           Snap  
 import           Snap.Extras.JSON (writeJSON)
 import           Snap.Snaplet.Heist
@@ -29,6 +32,7 @@ import           Application
 
 import Db.Facility
 import Db.Internal
+import KML
 
 handleApiSearchAc :: AppHandler ()
 handleApiSearchAc = do
@@ -41,6 +45,22 @@ handleApiSearch = do
   t <- acceptableSearch <$> getQueryParam "q"
   res <- runDb $ maybe (return []) (searchFacility . T.decodeUtf8) t
   writeJSON res
+
+handleApiKml :: AppHandler ()
+handleApiKml = do
+  parkId <- (>>= (readMay . B8.unpack)) <$> getParam "id"
+  case parkId of
+    Nothing -> do
+      modifyResponse $ setResponseStatus 400 "Bad Request"
+      writeJSON (object ["errorMessage" .= ("expected integer id" :: String)])
+      getResponse >>= finishWith
+    Just n -> runDb (queryParkKML n) >>= \t -> case t of
+      Nothing -> do
+        modifyResponse $ setResponseStatus 404 "Not Found"
+        writeJSON (object ["errorMessage" .= ("no kml for given id" :: String)])
+        getResponse >>= finishWith
+      Just t' -> writeText t'
+
 
 handleApiFeatures :: AppHandler ()
 handleApiFeatures = runDb parkFeatures >>= writeJSON             
@@ -58,6 +78,7 @@ routes =
   [ ("/api/search_ac", handleApiSearchAc)  
   , ("/api/search"   , handleApiSearch)  
   , ("/api/features" , handleApiFeatures)  
+  , ("/api/kml/:id"  , handleApiKml)
   , (""              , serveDirectory "static")
   ]
 
