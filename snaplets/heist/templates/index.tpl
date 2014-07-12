@@ -13,7 +13,7 @@
   </ifLoggedIn>
 
   <ifLoggedOut>
-    <apply template="_login"/>
+    <apply template="_basic_search"/>
   </ifLoggedOut>
 
 </apply>
