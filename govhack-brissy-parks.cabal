@@ -14,7 +14,7 @@ Flag development
   Description: Whether to build the server in development (interpreted) mode
   Default: False
 
-Executable govhack-brissy-parks
+Executable app
   hs-source-dirs: src
   main-is: Main.hs
 
@@ -51,7 +51,7 @@ Executable govhack-brissy-parks
                  -fno-warn-orphans -fno-warn-unused-do-bind
 
 
-Executable import-facilities
+Executable import
   hs-source-dirs: import,src
   main-is: Main.hs
 

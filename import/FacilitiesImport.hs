@@ -38,8 +38,8 @@ instance FromNamedRecord Facility where
     <*> m .: "ORIG_FID"
     <*> ((,) <$> m .: "LONGITUDE" <*> m .: "LATITUDE")
 
-importFacilities :: Postgres -> Script ()
-importFacilities pg = scriptIO $ do
+importFacilities :: Postgres -> IO ()
+importFacilities pg = do
   runReaderT deleteFacilities pg 
   mapConcurrently (loadAndInsert pg) [1,2]
   return ()

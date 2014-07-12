@@ -2,6 +2,7 @@
 module Main where
 
 import Control.Error (Script,runScript,scriptIO)
+import Control.Concurrent.Async (concurrently)
 import Data.Configurator (subconfig)
 import Data.Configurator.Types (Config)
 import Data.Pool (createPool)
@@ -15,7 +16,8 @@ import AdjoiningSuburbsImport
 main :: IO ()
 main = runScript $ do
   pg   <- scriptIO $ conf >>= getPostgres 
-  importFacilities pg
+  _ <- scriptIO $ concurrently (importFacilities pg) (importAdjoiningSuburbs pg)
+  return ()
 
 conf :: IO Config
 conf = loadAppConfig "devel.cfg" "."

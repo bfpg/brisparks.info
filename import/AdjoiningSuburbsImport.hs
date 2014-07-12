@@ -15,15 +15,15 @@ import Db.Internal
 import Db.AdjoiningSuburb
 import Internal
 
-data AdjoiningSuburb = AdjoiningSuburb Text Text
+data AdjoiningSuburb = AdjoiningSuburb Text Text deriving Show
 
 instance FromNamedRecord AdjoiningSuburb where
   parseNamedRecord m = AdjoiningSuburb 
     <$> m .: "Suburb"
     <*> m .: "Adjoining Suburb"
 
-importAdjoiningSuburbs :: Postgres -> Script ()
-importAdjoiningSuburbs pg = scriptIO $ do
+importAdjoiningSuburbs :: Postgres -> IO ()
+importAdjoiningSuburbs pg = do
   runReaderT deleteAdjoiningSuburbs pg 
   c <- loadCsv "data/SUBURBS_AND_ADJOINING_SUBURBS.csv"
   runReaderT (mapM_ insert c) $ pg

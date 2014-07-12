@@ -22,7 +22,7 @@ deleteAdjoiningSuburbs = execute_ "TRUNCATE adjoining_suburb" >> return ()
 
 insertAdjoiningSuburb :: Text -> Text -> Db Int
 insertAdjoiningSuburb a as = fromMaybe 0 . fmap fromOnly . headMay <$> query
-  "INSERT INTO adjoining_suburb (suburb_adjoining_suburb) VALUES (?,?) RETURNING id"
+  "INSERT INTO adjoining_suburb (suburb,adjoining_suburb) VALUES (?,?) RETURNING id"
   (a,as)
 
 searchAdjoiningSuburbs :: Text -> Db [Text]
