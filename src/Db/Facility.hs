@@ -29,22 +29,32 @@ import Snap.Snaplet.PostgresqlSimple (Postgres,Only(Only),fromOnly,query,query_,
 import Db.Internal
 
 data Facility = Facility
-  { _parkNumber :: CsvInt
-  , _parkName   :: Text
-  , _nodeId     :: CsvInt
-  , _nodeUse    :: Text
-  , _nodeName   :: Text
-  , _itemId     :: Text
-  , _itemType   :: Text
-  , _itemName   :: Text
-  , _description :: Text
-  , _easting     :: CsvDouble
-  , _northing    :: CsvDouble
-  , _origFid    :: CsvInt
-  , _coords      :: (CsvDouble,CsvDouble)
+  { _facParkNumber :: CsvInt
+  , _facParkName   :: Text
+  , _nodeId        :: CsvInt
+  , _nodeUse       :: Text
+  , _nodeName      :: Text
+  , _itemId        :: Text
+  , _itemType      :: Text
+  , _itemName      :: Text
+  , _description   :: Text
+  , _easting       :: CsvDouble
+  , _northing      :: CsvDouble
+  , _origFid       :: CsvInt
+  , _coords        :: (CsvDouble,CsvDouble)
   } deriving (Eq,Show)
 makeLenses ''Facility
 deriveJSON (aesonThOptions Nothing) ''Facility
+
+data ParkResult = ParkResult
+  { _parkResultNumber :: Int
+  , _parkResultName   :: Text
+  , _parkResultStreet :: Text
+  , _parkResultSuburb :: Text
+  , _parkResultLat    :: Double
+  , _parkResultLong   :: Double
+  } deriving (Eq,Show)
+deriveJSON (aesonThOptions (Just "_parkResult")) ''ParkResult
 
 deleteFacilities :: Db ()
 deleteFacilities = execute_ "TRUNCATE park_facility" >> return ()
@@ -120,25 +130,25 @@ parkFeatures st nodeUses itemTypes = nub . (explode =<<) <$> query
     explode :: (Text,Text) -> [Text]
     explode (nu,it) = [nu,it] 
 
-searchFacility :: Text -> Db [(Int,Facility)]
-searchFacility st = fmap (\ ((Only i) :. f) -> (i,f)) <$> query
+searchPark :: Text -> Db [ParkResult]
+searchPark st = query
+  [sql|
+     SELECT DISTINCT f.park_number, f.park_name,street,suburb,latitude,longtitude
+     FROM park_facility f LEFT JOIN park_address a ON (f.park_number = a.park_number)
+     WHERE f.park_name ILIKE ? OR suburb ILIKE ?
+     |]
+  (searchTerm st, searchTerm st)
+
+getFacilities :: Int -> Db [Facility]
+getFacilities id = query
    [sql|
-     SELECT park_
-       id, park_number,park_name,node_id,node_use,node_name,item_id,item_type,item_name,
+     SELECT 
+       park_number,park_name,node_id,node_use,node_name,item_id,item_type,item_name,
        description,easting,northing,orig_fid,ST_AsText(coords)
      FROM park_facility f
-       LEFT JOIN park_address a ON (f.park_number = a.park_number)
-       LEFT JOIN ajoining_suburb
-     WHERE f.park_name ILIKE ? OR a.suburb ILIKE a OR 
-                                             ( 
-       (SELECT 1,* FROM park_facility WHERE park_name LIKE ?)
-       UNION
-       (SELECT 2,* FROM park_facility LEFT JOIN WHERE  LIKE ?)
-     )                                        
+     WHERE f.park_number = ?
      |]
-  (search,search,search)  
-   where search =  searchTerm st
-
+   (Only id)
 searchTerm st = T.concat ["%",st,"%"]
 
 instance FromRow Facility where
@@ -156,16 +166,28 @@ instance FromRow Facility where
     <*> field 
     <*> field 
     <*> (parseCoords <$> field)
-    where
-       parseCoords = toTuple . filter (not . null) . splitWhen notDecimal . T.unpack 
-       notDecimal c = not (isDigit c || c == '.')
-       toTuple [long,lat] = (CsvDouble $ read long,CsvDouble $ read lat)
-       toTuple _          = (CsvDouble 0,CsvDouble 0)
+
+
+instance FromRow ParkResult where
+  fromRow = ParkResult
+    <$> field
+    <*> field 
+    <*> field 
+    <*> field 
+    <*> field 
+    <*> field 
+
+parseCoords :: Text -> (CsvDouble,CsvDouble)
+parseCoords = toTuple . filter (not . null) . splitWhen notDecimal . T.unpack 
+  where
+    notDecimal c = not (isDigit c || c == '.')
+    toTuple [long,lat] = (CsvDouble $ read long,CsvDouble $ read lat)
+    toTuple _          = (CsvDouble 0,CsvDouble 0)
 
 instance ToRow Facility where
   toRow f =
-    [ toField (f ^. parkNumber)
-    , toField (f ^. parkName)
+    [ toField (f ^. facParkNumber)
+    , toField (f ^. facParkName)
     , toField (f ^. nodeId)
     , toField (f ^. nodeUse)
     , toField (f ^. nodeName)
