@@ -46,6 +46,16 @@ data Facility = Facility
 makeLenses ''Facility
 deriveJSON (aesonThOptions Nothing) ''Facility
 
+data ParkResult = ParkResult
+  { _parkResultNumber :: Int
+  , _parkResultName   :: Text
+  , _parkResultStreet :: Text
+  , _parkResultSuburb :: Text
+  , _parkResultLat    :: Double
+  , _parkResultLong   :: Double
+  } deriving (Eq,Show)
+deriveJSON (aesonThOptions (Just "_parkResult")) ''ParkResult
+
 deleteFacilities :: Db ()
 deleteFacilities = execute_ "TRUNCATE park_facility" >> return ()
 
@@ -120,6 +130,15 @@ parkFeatures st nodeUses itemTypes = nub . (explode =<<) <$> query
     explode :: (Text,Text) -> [Text]
     explode (nu,it) = [nu,it] 
 
+searchPark :: Text -> Db [ParkResult]
+searchPark st = query
+  [sql|
+     SELECT DISTINCT f.park_number, f.park_name,street,suburb,latitude,longtitude
+     FROM park_facility f LEFT JOIN park_address a ON (f.park_number = a.park_number)
+     WHERE f.park_name ILIKE ? OR suburb ILIKE ?
+     |]
+  (searchTerm st, searchTerm st)
+
 searchFacility :: Text -> Db [(Int,Facility)]
 searchFacility st = fmap (\ ((Only i) :. f) -> (i,f)) <$> query
    [sql|
@@ -128,7 +147,7 @@ searchFacility st = fmap (\ ((Only i) :. f) -> (i,f)) <$> query
        description,easting,northing,orig_fid,ST_AsText(coords)
      FROM park_facility f
        LEFT JOIN park_address a ON (f.park_number = a.park_number)
-       LEFT JOIN ajoining_suburb
+       LEFT JOIN ajoining_suburb ON (
      WHERE f.park_name ILIKE ? OR a.suburb ILIKE a OR 
                                              ( 
        (SELECT 1,* FROM park_facility WHERE park_name LIKE ?)
@@ -156,11 +175,23 @@ instance FromRow Facility where
     <*> field 
     <*> field 
     <*> (parseCoords <$> field)
-    where
-       parseCoords = toTuple . filter (not . null) . splitWhen notDecimal . T.unpack 
-       notDecimal c = not (isDigit c || c == '.')
-       toTuple [long,lat] = (CsvDouble $ read long,CsvDouble $ read lat)
-       toTuple _          = (CsvDouble 0,CsvDouble 0)
+
+
+instance FromRow ParkResult where
+  fromRow = ParkResult
+    <$> field
+    <*> field 
+    <*> field 
+    <*> field 
+    <*> field 
+    <*> field 
+
+parseCoords :: Text -> (CsvDouble,CsvDouble)
+parseCoords = toTuple . filter (not . null) . splitWhen notDecimal . T.unpack 
+  where
+    notDecimal c = not (isDigit c || c == '.')
+    toTuple [long,lat] = (CsvDouble $ read long,CsvDouble $ read lat)
+    toTuple _          = (CsvDouble 0,CsvDouble 0)
 
 instance ToRow Facility where
   toRow f =

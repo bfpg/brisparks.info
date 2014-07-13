@@ -43,7 +43,7 @@ handleApiSearchAc = do
 handleApiSearch :: AppHandler ()
 handleApiSearch = do
   t <- acceptableSearch <$> getQueryParam "q"
-  res <- runDb $ maybe (return []) searchFacility t
+  res <- runDb $ maybe (return []) searchPark t
   writeJSON res
 
 handleApiKml :: AppHandler ()
@@ -60,6 +60,9 @@ handleApiFeatures = do
   t <- acceptableSearch <$> getQueryParam "q"
   res <- runDb $ maybe (return []) (\ st -> parkFeatures st [] []) t
   writeJSON res
+
+handleApiPark :: AppHandler ()
+handleApiPark = undefined
 
 httpErrorJson :: Int -> BS.ByteString -> String -> AppHandler a
 httpErrorJson status statusMsg msg = do
@@ -88,6 +91,7 @@ routes =
   [ ("/api/search_ac", handleApiSearchAc)
   , ("/api/search"   , handleApiSearch)
   , ("/api/features" , handleApiFeatures)
+  , ("/api/park/:id" , handleApiPark)  
   , ("/api/kml/:id"  , handleApiKml)
   , ("/results"      , handleSearchResults)
   , (""              , serveDirectory "static")
