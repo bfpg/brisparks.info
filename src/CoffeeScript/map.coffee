@@ -48,9 +48,11 @@ brissyParks.initMap = ->
     mapOptions
   )
 
-brissyParks.displayPark = (map, parkId) ->
+brissyParks.displayPark = (map, parkObj) ->
+  map.setCenter(new google.maps.LatLng(parkObj.lat, parkObj.long));
+  map.setZoom(18);
   $.ajax({
-    url: "/api/park/#{parkId}"
+    url: "/api/park/#{parkObj.number}"
   })
   .done((data, textStatus, jqXHR) ->
     # add kml to map
