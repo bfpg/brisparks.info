@@ -18,6 +18,13 @@
       <apply-content/>
 
     </div>
+    <div class="col-md-12">
+      <div class="row">
+        This site uses CC-BY licensed data from Brisbane City Council.
+        See the <a href="https://github.com/bfpg-govhack/govhack-brissy-parks">GitHub page</a>
+        for details.
+      </div>
+    </div>
     <!-- Latest compiled and minified JavaScript -->
     <script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
