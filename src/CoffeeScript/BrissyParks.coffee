@@ -47,12 +47,17 @@ $().ready ->
                         cursor: "crosshair", cursorAt: { top: -5, left: -5 },
                         connectToSortable: to })
 
+        extendList = (evt, ui) ->
+                item = $(ui.item).text().trim()
+                cur = $('#feature-form-list').attr('value')
+                $('#feature-form-list').attr('value', "#{cur},#{item}")
+
         # Connect our feature list with the selected feature list.
         connectFeatureLists = () ->
                 all = '.feature-list li.list-group-item'
                 sel = '#sortable-features'
 
-                $(sel).sortable({ revert: true })
+                $(sel).sortable({ revert: true, receive: extendList })
                 linkDraggable all, sel, true
 
                 $('ul, li').disableSelection()
