@@ -1,7 +1,7 @@
 <div class="container">
   <div class="row">
     <div class="col-md-12 column">
-      <h1 class="text-center">Fun Finder</h1>
+      <h1 class="text-center">Brisbane Park Finder</h1>
     </div>
   </div>
   
@@ -36,7 +36,7 @@
             </div>
             <div class="form-group">
 	      <button class="btn-default btn-lg" type="submit" id="searchButton" value="search">
-                Let's Find Some Fun!
+                Find My Park
               </button>
             </div>
             
