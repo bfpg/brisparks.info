@@ -21,7 +21,7 @@
       <div id="map-canvas" style="width:500px; height:400px;"></div>
     </div>
   </div>
-  <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAsgIi_D0W0TdPplCMUaV4CfMarIJWbCBM"></script>
+  <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCVcD_mOe8aIMJ3x-RnfwGQwHsqZQXCNP8"></script>
   <script type="text/javascript">
     google.maps.event.addDomListener(window, 'load', function(){
       var map = brissyParks.initMap();
