@@ -1,16 +1,24 @@
 window.brissyParks ?= {}
 
 facility_icons_map =
-  'PICNIC NODE': 'picnic'
+  'PICNIC BENCH/TABLE': 'picnic'
+  'TOILET': 'toilet'
+  'BUBBLER/DRINKING FOUNTAIN': 'water'
+  'TAP COMBINATION': 'water'
+  'BBQ': 'bbq'
+  'BASKETBALL/NETBALL FACILITY': 'sport'
+  'FITNESS EXERCISE EQUIPMENT': 'fitness'
+  'PLAY IMPLEMENT': 'playground'
 
-facility_icons = {
-  dog: { icon: '/icons/dog.png', title: 'Dog off-leash area' },
-  picnic: { icon: '/icons/table.png', title: 'Picnic area' },
-  playground: {},
-  sport: {},
-  toilet: {},
-  bbq: {},
-}
+facility_icons =
+  picnic: { url: '/icons/tourist_picnic.n.16.png', title: 'Picnic area' }
+  toilet: { url: '/icons/amenity_toilets.n.16.png', title: 'Toilet' }
+  water: { url: '/icons/food_drinkingtap.n.16.png', title: 'Drinking water' }
+  bbq: { url: '/icons/food_restaurant.n.16.png', title: 'Barbeque' }
+  sport: { url: '/icons/sport_soccer.n.16.png', title: 'Sport facility' }
+  fitness: { url: '/icons/sport_gymnasium.n.16.png', title: 'Fitness equipment' }
+  playground: { url: '/icons/sport_playground.n.16.png', title: 'Playground' }
+  dog: { url: '/icons/dog.png', title: 'Dog off-leash area' }
 
 brissyParks.initMap = ->
   mapOptions = {
@@ -33,19 +41,12 @@ brissyParks.displayPark = (map, parkId) ->
     kmlLayer = new google.maps.KmlLayer({ url: kmlHref, map: map })
 
     # add markers to map
-    console.dir facility_icons_map
-    console.dir facility_icons
     for facility in data.facilities
-      #console.log "checking: #{facility._nodeUse}"
-      icon_ref = facility_icons_map[facility._nodeUse]
+      icon_ref = facility_icons_map[facility._itemType]
       if icon = facility_icons[icon_ref]
-        new google.maps.Marker({
-          map: map,
-          #icon: "<the icon url>",
-          position: new google.maps.LatLng(-facility._coords[1], facility._coords[0]),
-          title: "something"
-        })
+        new google.maps.Marker
+          map: map
+          icon: icon.url
+          position: new google.maps.LatLng(-facility._coords[1], facility._coords[0])
+          title: icon.title
   )
-
-$().ready ->
-  #google.maps.event.addDomListener(window, 'load', initialize)
