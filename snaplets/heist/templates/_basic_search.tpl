@@ -27,28 +27,31 @@
     <div class="container">
       <div class="row">
         <div class="col-md-4 column">
-          <h2>Where ?</h2>    
-          <form class="form-horizontal"> <!-- Basic Text Area Search Form -->
+          <h2>Where ?</h2>
+
+           <!-- Basic Text Area Search Form -->
+          <form method="POST" action="/api/search" class="form-vertical">
             <div class="form-group">
 	      <input type="text" class="form-control input-lg" id="searchInput">
             </div>
             <div class="form-group">
-	      <button class="btn-default btn-lg" type="button" id="searchButton">
+	      <button class="btn-default btn-lg" type="submit" id="searchButton">
                 Let's Find Some Fun!
               </button>
             </div>
+            
+            <div class="container">
+              <div class="row">
+                <div class="col-md-4 column">
+                  <div class="selected-fields">
+                    <ul class="list-group" id="sortable-features">
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
           </form>
-        </div>
-      </div>
-    </div>
-    
-    <div class="container">
-      <div class="row">
-        <div class="col-md-4 column">
-          <div class="selected-fields">
-            <ul class="list-group" id="sortable-features">
-            </ul>
-          </div>
         </div>
       </div>
     </div>

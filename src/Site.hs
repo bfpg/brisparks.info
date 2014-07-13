@@ -16,6 +16,8 @@ import           Data.Aeson
 import           Data.ByteString (ByteString)
 import qualified Data.ByteString as BS
 import qualified Data.ByteString.Char8 as B8
+-- Aeson's "encode" to json generates lazy bytestrings
+import qualified Data.ByteString.Lazy.Char8 as BSL
 import           Data.Maybe (maybe)
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as T
@@ -41,11 +43,17 @@ handleApiSearchAc = do
   res <- runDb $ maybe (return []) searchShortList t
   writeJSON res
 
+parkResultSplice :: Monad m => ParkResult -> Splices (HeistT n m Template)
+parkResultSplice park = "park" ## I.textSplice $ T.pack (BSL.unpack $ encode park)
+
+parkResultsSplice :: [ParkResult] -> I.Splice AppHandler
+parkResultsSplice parks = I.mapSplices (I.runChildrenWith . parkResultSplice) parks
+
 handleApiSearch :: AppHandler ()
 handleApiSearch = do
   t <- acceptableSearch <$> getQueryParam "q"
   res <- runDb $ maybe (return []) searchPark t
-  writeJSON res
+  renderWithSplices "_search_results" ("parkResults" ## parkResultsSplice res)
 
 handleApiKml :: AppHandler ()
 handleApiKml = do
