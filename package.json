@@ -1,0 +1,26 @@
+{
+  "name": "govhack-brissy-parks",
+  "version": "0.0.0",
+  "description": "govhack-brissy-parks ====================",
+  "main": "Gruntfile.js",
+  "dependencies": {
+    "grunt": "^0.4.5",
+    "grunt-cli": "^0.1.13",
+    "grunt-contrib-watch": "^0.6.1",
+    "grunt-contrib-coffee": "^0.10.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bfpg-govhack/govhack-brissy-parks.git"
+  },
+  "author": "Team Lambda",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/bfpg-govhack/govhack-brissy-parks/issues"
+  },
+  "homepage": "https://github.com/bfpg-govhack/govhack-brissy-parks"
+}
