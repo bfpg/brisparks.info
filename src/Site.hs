@@ -19,6 +19,7 @@ import qualified Data.ByteString as BS
 import qualified Data.ByteString.Char8 as B8
 import qualified Data.Configurator as C
 import           Data.Maybe (maybe)
+import Data.List.Split (splitOn)
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as T
 import           Safe
@@ -46,7 +47,8 @@ handleApiSearchAc = do
 handleApiSearch :: AppHandler ()
 handleApiSearch = do
   t <- acceptableSearch <$> getQueryParam "q"
-  res <- runDb $ maybe (return []) searchPark t
+  f <- fmap (splitOn "," . B8.unpack) <$> getQueryParam "fs"
+  res <- runDb $ maybe (return []) (searchPark f) t
   writeJSON res
 
 handleApiKml :: AppHandler ()

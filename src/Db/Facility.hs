@@ -10,11 +10,12 @@ import Control.Monad.Reader (ReaderT)
 import Data.Aeson (ToJSON,FromJSON,toJSON,parseJSON)
 import Data.Aeson.TH (deriveJSON)
 import Data.Bifunctor (first)
+import Data.ByteString.Char8 (unpack)
 import Data.Char (isDigit)
 import Data.Foldable(fold)
 import Data.List (nub)
 import Data.List.Split (splitWhen)
-import Data.Maybe (fromMaybe) 
+import Data.Maybe (fromMaybe,isNothing) 
 import Data.Text (Text)
 import qualified Data.Text as T
 import Data.Traversable (sequenceA,traverse)
@@ -24,14 +25,14 @@ import Database.PostgreSQL.Simple.ToRow (ToRow,toRow)
 import Database.PostgreSQL.Simple.ToField (ToField,toField)
 import Database.PostgreSQL.Simple.FromField (FromField,Conversion,fromField)
 import Database.PostgreSQL.Simple.SqlQQ (sql)
-import Snap.Snaplet.PostgresqlSimple (Postgres,Only(Only),fromOnly,query,query_,execute_)
+import Snap.Snaplet.PostgresqlSimple (In(..),Postgres,Only(Only),fromOnly,query,query_,execute_)
 
 import Db.Internal
 
 data Facility = Facility
   { _facParkNumber :: CsvInt
   , _facParkName   :: Text
-  , _nodeId        :: CsvInt
+  , _nodeId     :: CsvInt
   , _nodeUse       :: Text
   , _nodeName      :: Text
   , _itemId        :: Text
@@ -130,15 +131,26 @@ parkFeatures st nodeUses itemTypes = nub . (explode =<<) <$> query
     explode :: (Text,Text) -> [Text]
     explode (nu,it) = [nu,it] 
 
-searchPark :: Text -> Db [ParkResult]
-searchPark st = query
-  [sql|
-     SELECT DISTINCT f.park_number, f.park_name,street,suburb,latitude,longtitude
-     FROM park_facility f LEFT JOIN park_address a ON (f.park_number = a.park_number)
-     WHERE f.park_name ILIKE ? OR suburb ILIKE ?
+searchPark :: Maybe [String] -> Text -> Db [ParkResult]
+searchPark f st = maybe noFeatureQ withFeaturesQ f
+  where
+    noFeatureQ = query
+      [sql|
+        SELECT DISTINCT f.park_number, f.park_name,street,suburb,latitude,longtitude
+        FROM park_facility f LEFT JOIN park_address a ON (f.park_number = a.park_number)
+        WHERE f.park_name ILIKE ? OR suburb ILIKE ? 
      |]
-  (searchTerm st, searchTerm st)
+     (searchTerm st, searchTerm st)
 
+    withFeaturesQ fs = query
+      [sql|
+        SELECT DISTINCT f.park_number, f.park_name,street,suburb,latitude,longtitude
+        FROM park_facility f LEFT JOIN park_address a ON (f.park_number = a.park_number)
+        WHERE (f.park_name ILIKE ? OR suburb ILIKE ?) AND (
+          node_use IN ? OR item_type IN ?
+       )
+     |]
+     (searchTerm st, searchTerm st,In fs, In fs)
 getFacilities :: Int -> Db [Facility]
 getFacilities id = query
    [sql|
