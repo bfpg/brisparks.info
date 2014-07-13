@@ -22,6 +22,7 @@ main = runScript $ do
     [ importFacilities pg
     , importAdjoiningSuburbs pg
     , importParkAddresses pg
+    , importFacilitiesWhitelists pg
     ]
   return ()
 

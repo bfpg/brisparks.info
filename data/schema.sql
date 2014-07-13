@@ -29,6 +29,16 @@ CREATE TABLE park_facility (
   , coords      GEOGRAPHY(Point)
 );
 
+DROP TABLE node_use_whitelist;
+CREATE TABLE node_use_whitelist (
+  node_use    VARCHAR(100)
+);
+
+DROP TABLE item_type_whitelist;
+CREATE TABLE item_type_whitelist (
+  item_type   VARCHAR(50)
+);
+
 CREATE TABLE adjoining_suburb (
   id                 SERIAL NOT NULL PRIMARY KEY
   , suburb           VARCHAR(50)
