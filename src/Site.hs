@@ -54,8 +54,8 @@ parkResultsSplice parks = I.mapSplices (I.runChildrenWith . parkResultSplice) pa
 
 handleApiSearch :: AppHandler ()
 handleApiSearch = do
-  t <- acceptableSearch <$> getQueryParam "q"
-  f <- fmap (splitOn "," . B8.unpack) <$> getQueryParam "fs"
+  t <- acceptableSearch <$> getQueryParam "searchtext"
+  f <- fmap (splitOn "," . B8.unpack) <$> getQueryParam "features"
   res <- runDb $ maybe (return []) (searchPark f) t
   renderWithSplices "_search_results" ("parkResults" ## parkResultsSplice res)
 
@@ -109,7 +109,7 @@ acceptableSearch = fmap T.decodeUtf8 . mfilter ((>= 3) . BS.length)
 routes :: [(ByteString, Handler App App ())]
 routes =
   [ ("/api/search_ac", handleApiSearchAc)
-  , ("/api/search"   , handleApiSearch)
+  , ("/search"       , handleApiSearch)
   , ("/api/features" , handleApiFeatures)
   , ("/api/park/:id" , handleApiPark)  
   , ("/api/kml/:id"  , handleApiKml)

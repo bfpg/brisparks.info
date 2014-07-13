@@ -92,6 +92,10 @@ $().ready ->
                 newItems = selectedFeatureList()
                 newItems.push(e.currentTarget.getAttribute('value'))
                 insertItemList '#sortable-features', newItems
+
+                storedList = _.reduce(newItems, (acc, i) -> "#{i},#{acc}")
+                $('#feature-form-list').attr('value', storedList)
+                
                 e.currentTarget.remove()
                 e.preventDefault()
 
