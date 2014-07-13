@@ -30,22 +30,26 @@
           <h2>Where ?</h2>
 
            <!-- Basic Text Area Search Form -->
-          <form method="POST" action="/api/search" class="form-vertical">
+          <form method="get" action="/search" class="form-vertical">
             <div class="form-group">
-	      <input type="text" class="form-control input-lg" id="searchInput">
+	      <input name="searchtext" type="text" class="form-control input-lg" id="searchInput">
             </div>
             <div class="form-group">
-	      <button class="btn-default btn-lg" type="submit" id="searchButton">
+	      <button class="btn-default btn-lg" type="submit" id="searchButton" value="search">
                 Let's Find Some Fun!
               </button>
             </div>
             
+            <input id="feature-form-list" name="features" value="" style="display:none;">
+
             <div class="container">
               <div class="row">
                 <div class="col-md-4 column">
                   <div class="selected-fields">
-                    <ul class="list-group" id="sortable-features">
+
+                    <ul class="list-group" id="sortable-features" name="features">
                     </ul>
+
                   </div>
                 </div>
               </div>

@@ -20,6 +20,24 @@ facility_icons =
   playground: { url: '/icons/sport_playground.n.16.png', title: 'Playground' }
   dog: { url: '/icons/dog.png', title: 'Dog off-leash area' }
 
+brissyParks.readResults = ->
+  _.map($('.park-results').contents(), (park) -> JSON.parse $(park).text())
+
+brissyParks.printPark = (p) ->
+  _.template("<div class='park-details'>
+    <h2> <%= name %> </h2>
+    <p>Located on <%= street %>, in <%= suburb %>. For those of you so inclined, here are the latitude and longtitude values: Lat <%= lat %>, Long <%= long %>.
+    </p>
+  </div>
+  ",
+  {
+    name: p.name,
+    street: p.street,
+    lat: p.lat,
+    long: p.long,
+    suburb: p.suburb
+  })
+  
 brissyParks.initMap = ->
   mapOptions = {
     center: new google.maps.LatLng(-27.497, 153.044),
