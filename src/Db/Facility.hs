@@ -6,6 +6,7 @@ module Db.Facility where
 import Control.Applicative ((<$>),(<*>))
 import Control.Error (headMay)
 import Control.Lens (_Wrapped,_Unwrapped,_Show,makeLenses,makeWrapped,(^.))
+import Control.Monad (mfilter)
 import Control.Monad.Reader (ReaderT)
 import Data.Aeson (ToJSON,FromJSON,toJSON,parseJSON)
 import Data.Aeson.TH (deriveJSON)
@@ -135,7 +136,7 @@ parkFeatures st nodeUses itemTypes = nub . (explode =<<) <$> query
     explode (nu,it) = [nu,it] 
 
 searchPark :: Maybe [String] -> Text -> Db [ParkResult]
-searchPark f st = maybe noFeatureQ withFeaturesQ f
+searchPark f st = maybe noFeatureQ withFeaturesQ . mfilter null $ f
   where
     noFeatureQ = query
       [sql|
