@@ -56,4 +56,4 @@ getPark baseUrl id = do
          |]
       (Only id)
     mkPark fs (n,name,st,sub,lat,long) = Park n name st sub lat long kmlUrl fs
-    kmlUrl = T.concat [baseUrl,"/",T.pack . show $ id]
+    kmlUrl = T.concat [baseUrl,"/api/kml/",T.pack . show $ id]
