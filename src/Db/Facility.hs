@@ -122,10 +122,13 @@ searchParkAdjoiningSuburbs st = query
 parkFeatures :: Text -> [Text] -> [Text] -> Db [Text]
 parkFeatures st nodeUses itemTypes = nub . (explode =<<) <$> query
   [sql|
-   SELECT DISTINCT node_use, item_type
-   FROM park_facility f LEFT JOIN park_address a ON (f.park_number = a.park_number)
+   SELECT DISTINCT f.node_use, f.item_type
+   FROM park_facility f
+     LEFT JOIN park_address a ON (f.park_number = a.park_number)
+     JOIN node_use_whitelist n ON (f.node_use = n.node_use)
+     JOIN item_type_whitelist i ON (f.item_type = i.item_type)
    WHERE f.park_name ILIKE ? OR suburb ILIKE ?
-    |]
+  |]
   (searchTerm st,searchTerm st)
   where
     explode :: (Text,Text) -> [Text]
