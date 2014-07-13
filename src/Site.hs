@@ -12,10 +12,12 @@ module Site
 import           Control.Applicative
 import           Control.Monad (mfilter)
 import           Control.Monad.Reader (runReaderT)
+import           Control.Monad.State (gets)
 import           Data.Aeson
 import           Data.ByteString (ByteString)
 import qualified Data.ByteString as BS
 import qualified Data.ByteString.Char8 as B8
+import qualified Data.Configurator as C
 import           Data.Maybe (maybe)
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as T
@@ -65,9 +67,10 @@ handleApiFeatures = do
 handleApiPark :: AppHandler ()
 handleApiPark = do
   parkId <- (>>= (readMay . B8.unpack)) <$> getParam "id"
+  bUrl   <- gets _baseUrl
   case parkId of
     Nothing -> httpErrorJson 400 "Bad Request" "expected integer id"
-    Just n -> runDb (getPark "http://localhost:8000" n)
+    Just n -> runDb (getPark bUrl n)
       >>= require ("No Park witn ID " ++ show n)
       >>= writeJSON
 
@@ -110,5 +113,7 @@ app :: SnapletInit App App
 app = makeSnaplet "app" "An snaplet example application." Nothing $ do
     h <- nestSnaplet "" heist $ heistInit "templates"
     d <- nestSnaplet "db" db pgsInit
+    c <- getSnapletUserConfig
+    baseUrl <- liftIO $ C.require c "baseUrl"
     addRoutes routes
-    return $ App h d
+    return $ App h d baseUrl
