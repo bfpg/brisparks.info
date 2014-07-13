@@ -12,7 +12,7 @@ DROP TABLE park_facility;
 DROP TABLE park_address;  
 DROP TABLE adjoining_suburb;   
   
-CREATE TABLE park_facility (
+CREATE TABLE public.park_facility (
   id            SERIAL NOT NULL PRIMARY KEY
   , park_number INTEGER
   , park_name   VARCHAR(255)
@@ -30,22 +30,22 @@ CREATE TABLE park_facility (
 );
 
 DROP TABLE node_use_whitelist;
-CREATE TABLE node_use_whitelist (
+CREATE TABLE public.node_use_whitelist (
   node_use    VARCHAR(100)
 );
 
 DROP TABLE item_type_whitelist;
-CREATE TABLE item_type_whitelist (
+CREATE TABLE public.item_type_whitelist (
   item_type   VARCHAR(50)
 );
 
-CREATE TABLE adjoining_suburb (
+CREATE TABLE public.adjoining_suburb (
   id                 SERIAL NOT NULL PRIMARY KEY
   , suburb           VARCHAR(50)
   , adjoining_suburb VARCHAR(50) 
 );  
 
-CREATE TABLE park_address (
+CREATE TABLE public.park_address (
   park_number INTEGER
   , park_name VARCHAR(255)
   , street VARCHAR(255)
