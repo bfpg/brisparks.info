@@ -15,7 +15,7 @@
   <script type="text/javascript">
     google.maps.event.addDomListener(window, 'load', function(){
       var map = brissyParks.initMap();
-      brissyParks.displayPark(map, 100);
+      brissyParks.displayPark(map, 17);
     });
   </script>
 </div>

@@ -31,14 +31,12 @@ brissyParks.initMap = ->
   )
 
 brissyParks.displayPark = (map, parkId) ->
-  parkId = 64
   $.ajax({
     url: "/api/park/#{parkId}"
   })
   .done((data, textStatus, jqXHR) ->
     # add kml to map
-    kmlHref = 'https://frase.id.au/64.kml'
-    kmlLayer = new google.maps.KmlLayer({ url: kmlHref, map: map })
+    kmlLayer = new google.maps.KmlLayer({ url: data.kmlHref, map: map })
 
     # add markers to map
     for facility in data.facilities
