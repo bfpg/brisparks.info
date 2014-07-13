@@ -24,3 +24,9 @@ img {
 #info {
    font-size: 60%;
 }
+
+#sortable-features {
+    border: black;
+    border-style: dotted;
+    height: 150px;
+}
