@@ -24,7 +24,7 @@
 
       if (searchResults.length !== 0) {
         $('#park-detail-display').html(brissyParks.printPark(searchResults[0]));
-        brissyParks.displayPark(map, searchResults[0].number);
+        brissyParks.displayPark(map, searchResults[0]);
       }
       else {
         brissyParks.displayPark(map, 17);
