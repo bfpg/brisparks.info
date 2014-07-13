@@ -1,3 +1,8 @@
+DROP SCHEMA public CASCADE;
+DROP SCHEMA tiger CASCADE;
+
+CREATE SCHEMA public;   
+  
 CREATE EXTENSION postgis;
 CREATE EXTENSION postgis_topology;
 CREATE EXTENSION fuzzystrmatch;
