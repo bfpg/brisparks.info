@@ -32,6 +32,7 @@ import           Application
 
 import Db.Facility
 import Db.Internal
+import Db.Park
 import KML
 
 handleApiSearchAc :: AppHandler ()
@@ -62,7 +63,13 @@ handleApiFeatures = do
   writeJSON res
 
 handleApiPark :: AppHandler ()
-handleApiPark = undefined
+handleApiPark = do
+  parkId <- (>>= (readMay . B8.unpack)) <$> getParam "id"
+  case parkId of
+    Nothing -> httpErrorJson 400 "Bad Request" "expected integer id"
+    Just n -> runDb (getPark "http://localhost:8000" n)
+      >>= require ("No Park witn ID " ++ show n)
+      >>= writeJSON
 
 httpErrorJson :: Int -> BS.ByteString -> String -> AppHandler a
 httpErrorJson status statusMsg msg = do

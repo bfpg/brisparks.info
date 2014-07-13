@@ -29,19 +29,19 @@ import Snap.Snaplet.PostgresqlSimple (Postgres,Only(Only),fromOnly,query,query_,
 import Db.Internal
 
 data Facility = Facility
-  { _parkNumber :: CsvInt
-  , _parkName   :: Text
-  , _nodeId     :: CsvInt
-  , _nodeUse    :: Text
-  , _nodeName   :: Text
-  , _itemId     :: Text
-  , _itemType   :: Text
-  , _itemName   :: Text
-  , _description :: Text
-  , _easting     :: CsvDouble
-  , _northing    :: CsvDouble
-  , _origFid    :: CsvInt
-  , _coords      :: (CsvDouble,CsvDouble)
+  { _facParkNumber :: CsvInt
+  , _facParkName   :: Text
+  , _nodeId        :: CsvInt
+  , _nodeUse       :: Text
+  , _nodeName      :: Text
+  , _itemId        :: Text
+  , _itemType      :: Text
+  , _itemName      :: Text
+  , _description   :: Text
+  , _easting       :: CsvDouble
+  , _northing      :: CsvDouble
+  , _origFid       :: CsvInt
+  , _coords        :: (CsvDouble,CsvDouble)
   } deriving (Eq,Show)
 makeLenses ''Facility
 deriveJSON (aesonThOptions Nothing) ''Facility
@@ -139,25 +139,16 @@ searchPark st = query
      |]
   (searchTerm st, searchTerm st)
 
-searchFacility :: Text -> Db [(Int,Facility)]
-searchFacility st = fmap (\ ((Only i) :. f) -> (i,f)) <$> query
+getFacilities :: Int -> Db [Facility]
+getFacilities id = query
    [sql|
-     SELECT park_
-       id, park_number,park_name,node_id,node_use,node_name,item_id,item_type,item_name,
+     SELECT 
+       park_number,park_name,node_id,node_use,node_name,item_id,item_type,item_name,
        description,easting,northing,orig_fid,ST_AsText(coords)
      FROM park_facility f
-       LEFT JOIN park_address a ON (f.park_number = a.park_number)
-       LEFT JOIN ajoining_suburb ON (
-     WHERE f.park_name ILIKE ? OR a.suburb ILIKE a OR 
-                                             ( 
-       (SELECT 1,* FROM park_facility WHERE park_name LIKE ?)
-       UNION
-       (SELECT 2,* FROM park_facility LEFT JOIN WHERE  LIKE ?)
-     )                                        
+     WHERE f.park_number = ?
      |]
-  (search,search,search)  
-   where search =  searchTerm st
-
+   (Only id)
 searchTerm st = T.concat ["%",st,"%"]
 
 instance FromRow Facility where
@@ -195,8 +186,8 @@ parseCoords = toTuple . filter (not . null) . splitWhen notDecimal . T.unpack
 
 instance ToRow Facility where
   toRow f =
-    [ toField (f ^. parkNumber)
-    , toField (f ^. parkName)
+    [ toField (f ^. facParkNumber)
+    , toField (f ^. facParkName)
     , toField (f ^. nodeId)
     , toField (f ^. nodeUse)
     , toField (f ^. nodeName)
