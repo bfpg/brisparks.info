@@ -112,7 +112,7 @@ searchParkAdjoiningSuburbs :: Text -> Db [(Text,Text)]
 searchParkAdjoiningSuburbs st = query
   [sql|
     SELECT DISTINCT aj.suburb,adjoining_suburb
-    adjoining_suburb aj 
+    FROM adjoining_suburb aj 
     JOIN park_address pa2 ON (UPPER(aj.adjoining_suburb) = pa2.suburb)
     WHERE aj.suburb ILIKE ?
     |]
