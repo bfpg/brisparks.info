@@ -70,3 +70,10 @@ Compiling coffeescript to javascript on the fly:
     % npm install grunt grunt-cli grunt-contrib-coffee \
       grunt-contrib-watch
     % node ./node_modules/grunt-cli/bin/grunt watch
+
+
+Attribution
+===========
+
+Icons are from the CC0 (public domain) SJJB icon set available from
+http://www.sjjb.co.uk/mapicons/download/SJJB-PNG-Icons-20111021.tar.gz.
