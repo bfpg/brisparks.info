@@ -56,6 +56,7 @@ data ParkResult = ParkResult
   , _parkResultLat    :: Double
   , _parkResultLong   :: Double
   } deriving (Eq,Show)
+makeLenses ''ParkResult
 deriveJSON (aesonThOptions (Just "_parkResult")) ''ParkResult
 
 deleteFacilities :: Db ()

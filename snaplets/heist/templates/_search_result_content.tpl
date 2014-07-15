@@ -1,16 +1,23 @@
-<!-- Data populated by Heist Template. -->
-<parkResults>
-  <div class="park-results" style="display:none;">
-    <park/>
-  </div>
-  
-</parkResults>
-<!-- End -->
-
 <div class="container">
   <div class="row">
     <div class="col-md-5 column">
         <div id="park-detail-display"></div>
+
+        <h3>Search Results</h3>
+        <parkResults>
+          <div class="list-group park-results-list">
+            <div class="list-group-item park-item"
+              data-number="${parkNumber}"
+              data-lat="${parkLat}"
+              data-long="${parkLong}">
+
+              <h4 class="list-group-item-heading"><parkName/></h4>
+
+              <p class="list-group-item-text">Located on <parkStreet/>, in <parkSuburb/> For those of you so inclined, here are the latitude and longtitude values: Lat <parkLat/>, Long <parkLong/>.
+              </p>
+            </div>
+          </div>
+          </parkResults>
     </div>
     <div class="col-md-7 col-md-offset-5 column">
       <div id="map-canvas" style="width:500px; height:400px;"></div>
@@ -22,8 +29,7 @@
       var map = brissyParks.initMap();
       var searchResults = brissyParks.readResults();
 
-      if (searchResults.length !== 0) {
-        $('#park-detail-display').html(brissyParks.printPark(searchResults[0]));
+      if (searchResults.length > 0) {
         brissyParks.displayPark(map, searchResults[0]);
       }
       else {

@@ -47,7 +47,15 @@ handleApiSearchAc = do
   writeJSON res
 
 parkResultSplice :: Monad m => ParkResult -> Splices (HeistT n m Template)
-parkResultSplice park = "park" ## I.textSplice $ T.pack (BSL.unpack $ encode park)
+parkResultSplice p = do
+  splice "parkNumber" (T.pack . show . _parkResultNumber)
+  splice "parkLat"    (T.pack . show . _parkResultLat)
+  splice "parkLong"   (T.pack . show . _parkResultLong)
+  splice "parkName"   _parkResultName
+  splice "parkStreet" _parkResultStreet
+  splice "parkSuburb" _parkResultSuburb
+  where
+    splice a f = a ## I.textSplice $ f p
 
 parkResultsSplice :: [ParkResult] -> I.Splice AppHandler
 parkResultsSplice parks = I.mapSplices (I.runChildrenWith . parkResultSplice) parks

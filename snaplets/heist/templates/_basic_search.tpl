@@ -4,7 +4,7 @@
       <h1 class="text-center">Brisbane Park Finder</h1>
     </div>
   </div>
-  
+
   <div class="col-md-4 column">
     <div class="container">
       <div class="row">
@@ -39,7 +39,7 @@
                 Find My Park
               </button>
             </div>
-            
+
             <input id="feature-form-list" name="features" value="" style="display:none;">
 
             <div class="container">
@@ -54,13 +54,13 @@
                 </div>
               </div>
             </div>
-            
+
           </form>
         </div>
       </div>
     </div>
   </div>
-  
+
   <div class="col-md-4 column">
     <div class="container">
       <div class="row">
