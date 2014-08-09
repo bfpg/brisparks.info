@@ -66,23 +66,13 @@ Executable import
     , async
     , bifunctors
     , bytestring                >= 0.9.1   && < 0.11
-    , cassava                   
+    , cassava
     , configurator
     , errors
     , lens
+    , process
     , transformers
-    , postgresql-simple  
+    , postgresql-simple
     , vector
-  
 
   ghc-options: -threaded -O2
-
-
-Executable kml
-  hs-source-dirs: kml, src
-  main-is: Main.hs
-
-  build-depends:
-    base >= 4.4 && < 5
-    , configurator
-    , postgresql-simple
