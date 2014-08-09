@@ -76,13 +76,3 @@ Executable import
     , vector
 
   ghc-options: -threaded -O2
-
-
-Executable kml
-  hs-source-dirs: kml, src
-  main-is: Main.hs
-
-  build-depends:
-    base >= 4.4 && < 5
-    , configurator
-    , postgresql-simple
