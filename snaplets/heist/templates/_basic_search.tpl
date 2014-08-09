@@ -1,81 +1,47 @@
 <div class="container">
   <div class="row">
-    <div class="col-md-12 column">
+    <div class="col-md-12">
       <h1 class="text-center">Brisbane Park Finder</h1>
     </div>
   </div>
 
-  <div class="col-md-4 column">
-    <div class="container">
-      <div class="row">
-        <div class="col-md-4 column">
-          <h2>Park Features</h2>
-          Click or drag these features to the search area.
-          <div class="container">
-            <div class="row">
-              <div class="col-md-4 column">
-                <div id="left-list-cont"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+  <div class="col-md-4">
+    <h2>Park Features</h2>
+    Click or drag the features that appear here to the search area.
+    <div id="left-list-cont"></div>
+
   </div>
 
-  <div class="col-md-4 column">
-    <div class="container">
-      <div class="row">
-        <div class="col-md-4 column">
-          <h2>Where ?</h2>
+  <div class="col-md-4">
+    <div class="text-center">
+      <h2>Search !</h2>
+      <p class="lead">Start by typing a suburb.</p>
+      <br>
+      <p>Select from the list of features that are returned to narrow your search.</p>
 
-           <!-- Basic Text Area Search Form -->
-          <form method="get" action="/search" class="form-vertical">
-            <div class="form-group">
-	      <input name="searchtext" type="text" class="form-control input-lg" id="searchInput">
-            </div>
-            <div class="form-group">
-	      <button class="btn-default btn-lg" type="submit" id="searchButton" value="search">
-                Find My Park
-              </button>
-            </div>
-
-            <input id="feature-form-list" name="features" value="" style="display:none;">
-
-            <div class="container">
-              <div class="row">
-                <div class="col-md-4 column">
-                  <div class="selected-fields">
-
-                    <ul class="list-group" id="sortable-features" name="features">
-                    </ul>
-
-                  </div>
-                </div>
-              </div>
-            </div>
-
-          </form>
-        </div>
-      </div>
     </div>
+    <!-- Basic Text Area Search Form -->
+    <form class="form-inline" method="get" action="/search" role="form">
+
+      <div class="form-group">
+        <input name="searchtext" type="text" class="form-control input-lg" id="searchInput">
+      </div>
+
+      <div class="form-group">
+        <button class="btn btn-default btn-lg" type="submit" id="searchButton" value="search">Find My Park</button>
+      </div>
+
+      <input id="feature-form-list" name="features" value="" style="display:none;">
+
+      <div class="selected-fields well">
+        <ul class="list-group" id="sortable-features" name="features"> </ul>
+      </div>
+    </form>
   </div>
 
-  <div class="col-md-4 column">
-    <div class="container">
-      <div class="row">
-        <div class="col-md-4 column">
-          <h2>Other Things</h2>
-          When do you want to visit the park?
-          <div class="container">
-            <div class="row">
-              <div class="col-md-4 column">
-                <div id="right-list-cont"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+  <div class="col-md-4">
+    <h2>Park Features</h2>
+    Click or drag the features that appear here to the search area.
+    <div id="right-list-cont"></div>
   </div>
 </div>

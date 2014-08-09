@@ -65,7 +65,6 @@ $().ready ->
         # Retrieve the feature list for a park
         featureList = (name) ->
                 $.get(featureUri name).done (data) ->
-                        console.log data
                         xs = []
                         ys = []
                         _.map data, (v, i) ->
@@ -112,7 +111,7 @@ $().ready ->
 
         renderSuggestion = (sugg) ->
                 _.template(
-                        "<p><%= sugg %></p>",
+                        "<p class='list-group-item'><%= sugg %></p>",
                 { sugg: sugg.value })
 
         # This sets our search input field as a typeahead
