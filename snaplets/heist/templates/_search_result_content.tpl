@@ -11,9 +11,8 @@
               data-lat="${parkLat}"
               data-long="${parkLong}">
 
-              <h4 class="list-group-item-heading"><parkName/></h4>
-
-              <p class="list-group-item-text">Located on <parkStreet/>, in <parkSuburb/> For those of you so inclined, here are the latitude and longtitude values: Lat <parkLat/>, Long <parkLong/>.
+              <h4 class="list-group-item-heading"><strong><parkName/></strong></h4>
+              <p class="list-group-item-text">Located on <parkStreet/>, in <parkSuburb/>.
               </p>
             </div>
           </div>
