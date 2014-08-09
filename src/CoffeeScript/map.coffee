@@ -20,13 +20,20 @@ facility_icons =
   playground: { url: '/icons/sport_playground.n.16.png', title: 'Playground' }
   dog_off_leash_area: { url: '/icons/shopping_pet2.n.16.png', title: 'Dog off-leash area' }
 
+brissyParks.readParkInfo = (p) ->
+  number: $(p).data('number')
+  lat: $(p).data('lat')
+  long: $(p).data('long')
+
 brissyParks.readResults = ->
-  _.map($('.park-results-list .park-item'), (park) ->
-    {
-      number: $(park).data('number'),
-      lat: $(park).data('lat'),
-      long: $(park).data('long')
-    })
+  _.map($('.park-results-list .park-item'), brissyParks.readParkInfo)
+  
+  # (park)->
+  #   {
+  #     number: $(park).data('number'),
+  #     lat: $(park).data('lat'),
+  #     long: $(park).data('long')
+  #   })
 
 brissyParks.initMap = ->
   mapOptions = {
@@ -66,3 +73,11 @@ brissyParks.displayPark = (map, parkObj) ->
             -feature._featureCoords[1], feature._featureCoords[0])
           title: icon.title
   )
+
+
+# Init the click handler for displaying different maps
+$('.park-item').on('click', (e) ->
+  brissyParks.displayPark(
+    brissyParks.initMap(),
+    brissyParks.readParkInfo(e.currentTarget))
+)

@@ -25,3 +25,12 @@ img {
    font-size: 60%;
 }
 
+#search-input-fg {
+  margin-left: 55px;
+}
+#search-button-fg {
+  margin: 15px;
+  margin-left: 100px;
+}
+
+.ui-state-highlight { height: 1.5em; line-height: 1.2em; }

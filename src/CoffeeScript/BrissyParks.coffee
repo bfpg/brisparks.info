@@ -35,8 +35,11 @@ $().ready ->
 
         # Take a target id and a given list of elements and create a ul with that id
         # and populate it with lis from the list.
-        insertItemList = (id, list) ->
-                $(id).html createItemList(list, id)
+        insertItemList = (id, list, justInsert) ->
+          if justInsert
+          then $('#' + id).html list
+          else $('#' + id).html createItemList(list, id)
+
 
         # This will set the first selector list of li to be a draggable list
         # that is connected to a sortable list.
@@ -57,7 +60,7 @@ $().ready ->
                 all = '.feature-list li.list-group-item'
                 sel = '#sortable-features'
 
-                $(sel).sortable({ revert: true, receive: extendList })
+                $(sel).sortable({ revert: true, receive: extendList, placeholder: "ui-state-highlight" }).disableSelection()
                 linkDraggable all, sel, true
 
                 $('ul, li').disableSelection()
@@ -70,8 +73,8 @@ $().ready ->
                         _.map data, (v, i) ->
                                 if i % 2 == 0 then xs.push v else ys.push v
                         # Add the features to the display.
-                        insertItemList '#left-list-cont', xs
-                        insertItemList '#right-list-cont', ys
+                        insertItemList 'left-list-cont', xs
+                        insertItemList 'right-list-cont', ys
                         connectFeatureLists()
                         # Add the handler to the features.
                         $('.feature-list li.list-group-item').on 'click', addFeature
@@ -95,7 +98,7 @@ $().ready ->
         addFeature = (e) ->
                 newItems = selectedFeatureList()
                 newItems.push(e.currentTarget.getAttribute('value'))
-                insertItemList '#sortable-features', newItems
+                insertItemList 'sortable-features', listItems(newItems), true
 
                 storedList = _.reduce(newItems, (acc, i) -> "#{i},#{acc}")
                 $('#feature-form-list').attr('value', storedList)

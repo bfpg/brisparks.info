@@ -23,18 +23,18 @@
     <!-- Basic Text Area Search Form -->
     <form class="form-inline" method="get" action="/search" role="form">
 
-      <div class="form-group">
+      <div id="search-input-fg" class="form-group">
         <input name="searchtext" type="text" class="form-control input-lg" id="searchInput">
       </div>
 
-      <div class="form-group">
+      <div id="search-button-fg" class="form-group">
         <button class="btn btn-default btn-lg" type="submit" id="searchButton" value="search">Find My Park</button>
       </div>
 
       <input id="feature-form-list" name="features" value="" style="display:none;">
 
-      <div class="selected-fields well">
-        <ul class="list-group" id="sortable-features" name="features"> </ul>
+      <div class="selected-fields">
+        <ul class="list-group feature-list well" id="sortable-features" name="features"> </ul>
       </div>
     </form>
   </div>
