@@ -12,10 +12,8 @@ import Data.Aeson (ToJSON,FromJSON,toJSON,parseJSON)
 import Data.Aeson.TH (deriveJSON)
 import Data.Bifunctor (first)
 import Data.ByteString.Char8 (unpack)
-import Data.Char (isDigit)
 import Data.Foldable(fold)
 import Data.List (nub)
-import Data.List.Split (splitWhen)
 import Data.Maybe (fromMaybe,isNothing) 
 import Data.Text (Text)
 import qualified Data.Text as T
@@ -193,13 +191,6 @@ instance FromRow ParkResult where
     <*> field 
     <*> field 
     <*> field 
-
-parseCoords :: Text -> (CsvDouble,CsvDouble)
-parseCoords = toTuple . filter (not . null) . splitWhen notDecimal . T.unpack 
-  where
-    notDecimal c = not (isDigit c || c == '.')
-    toTuple [long,lat] = (CsvDouble $ read long,CsvDouble $ read lat)
-    toTuple _          = (CsvDouble 0,CsvDouble 0)
 
 instance ToRow Facility where
   toRow f =

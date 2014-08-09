@@ -24,15 +24,13 @@
   </div>
   <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCVcD_mOe8aIMJ3x-RnfwGQwHsqZQXCNP8"></script>
   <script type="text/javascript">
+    <!-- TODO: we will also want click handler for showing different parks -->
     google.maps.event.addDomListener(window, 'load', function(){
       var map = brissyParks.initMap();
       var searchResults = brissyParks.readResults();
 
       if (searchResults.length > 0) {
         brissyParks.displayPark(map, searchResults[0]);
-      }
-      else {
-        brissyParks.displayPark(map, 17);
       }
     });
   </script>

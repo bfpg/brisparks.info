@@ -18,7 +18,7 @@ facility_icons =
   sport: { url: '/icons/sport_soccer.n.16.png', title: 'Sport facility' }
   fitness: { url: '/icons/sport_gymnasium.n.16.png', title: 'Fitness equipment' }
   playground: { url: '/icons/sport_playground.n.16.png', title: 'Playground' }
-  dog: { url: '/icons/dog.png', title: 'Dog off-leash area' }
+  dog_off_leash_area: { url: '/icons/shopping_pet2.n.16.png', title: 'Dog off-leash area' }
 
 brissyParks.readResults = ->
   _.map($('.park-results-list .park-item'), (park) ->
@@ -56,5 +56,13 @@ brissyParks.displayPark = (map, parkObj) ->
           map: map
           icon: icon.url
           position: new google.maps.LatLng(-facility._coords[1], facility._coords[0])
+          title: icon.title
+    for feature in data.features
+      if icon = facility_icons[feature._featureId]
+        new google.maps.Marker
+          map: map
+          icon: icon.url
+          position: new google.maps.LatLng(
+            -feature._featureCoords[1], feature._featureCoords[0])
           title: icon.title
   )
