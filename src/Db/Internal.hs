@@ -4,9 +4,12 @@ module Db.Internal where
 import Control.Lens (_Wrapped,_Unwrapped,(^.),makeWrapped)
 import Data.Aeson (ToJSON,FromJSON,toJSON,parseJSON)
 import Data.List (stripPrefix)
+import Data.List.Split (splitWhen)
 import Data.Aeson.TH (Options,defaultOptions,fieldLabelModifier)
-import Data.Char (toLower)
+import Data.Char (toLower, isDigit)
 import Data.Maybe (fromMaybe)
+import qualified Data.Text as T
+
 import Database.PostgreSQL.Simple.ToField (ToField,toField)
 import Database.PostgreSQL.Simple.FromField (FromField,Conversion,fromField)
 import Control.Monad.Reader (ReaderT)
@@ -41,7 +44,7 @@ instance FromField CsvDouble where
 instance ToField CsvDouble where
   toField f = toField (f ^. _Wrapped :: Double)
 
-aesonThOptions :: (Maybe String) -> Options
+aesonThOptions :: Maybe String -> Options
 aesonThOptions prefix = defaultOptions { fieldLabelModifier = fixName }
   where 
     fixName :: String ->  String
@@ -51,3 +54,10 @@ aesonThOptions prefix = defaultOptions { fieldLabelModifier = fixName }
       return $ case stripped of
         []     -> []
         (a:as) -> toLower a : as
+
+parseCoords :: T.Text -> (CsvDouble,CsvDouble)
+parseCoords = toTuple . filter (not . null) . splitWhen notDecimal . T.unpack 
+  where
+    notDecimal c = not (isDigit c || c == '.')
+    toTuple [long,lat] = (CsvDouble $ read long,CsvDouble $ read lat)
+    toTuple _          = (CsvDouble 0,CsvDouble 0)

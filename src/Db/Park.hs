@@ -28,6 +28,7 @@ import Snap.Snaplet.PostgresqlSimple (Postgres,Only(Only),fromOnly,query,query_,
 
 import Db.Internal
 import Db.Facility
+import Db.Feature
 
 data Park = Park
   { _parkNumber     :: Int
@@ -38,14 +39,16 @@ data Park = Park
   , _parkLong       :: Double
   , _parkKmlHref    :: Text
   , _parkFacilities :: [Facility]
+  , _parkFeatures   :: [Feature]
   } deriving (Eq,Show)
 deriveJSON (aesonThOptions (Just "_park")) ''Park
 
 getPark :: Text -> Int -> Db (Maybe Park)
 getPark baseUrl id = do
   tsMay <- q id
-  f     <- getFacilities id 
-  return $ fmap (mkPark f) tsMay
+  facilities <- getFacilities id
+  features <- getFeatures id
+  return $ fmap (mkPark facilities features) tsMay
   where
     q :: Int -> Db (Maybe (Int,Text,Text,Text,Double,Double))
     q id = headMay <$> query
@@ -55,5 +58,6 @@ getPark baseUrl id = do
          WHERE f.park_number = ?
          |]
       (Only id)
-    mkPark fs (n,name,st,sub,lat,long) = Park n name st sub lat long kmlUrl fs
+    mkPark fs fs' (n,name,st,sub,lat,long)
+      = Park n name st sub lat long kmlUrl fs fs'
     kmlUrl = T.concat [baseUrl,"/api/kml/",T.pack . show $ id]

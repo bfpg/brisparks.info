@@ -55,3 +55,12 @@ CREATE TABLE public.park_address (
   , latitude FLOAT(53)
   , longtitude FLOAT(53)
 );
+
+-- table for "distilled" park facilities
+--
+CREATE TABLE public.park_feature (
+    id SERIAL NOT NULL PRIMARY KEY
+    , park_number   INTEGER
+    , feature_id    VARCHAR(32)
+    , coords        GEOGRAPHY(Point)
+);

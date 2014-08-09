@@ -39,8 +39,9 @@ instance FromNamedRecord Facility where
 
 importFacilities :: Postgres -> IO ()
 importFacilities pg = do
-  runReaderT deleteFacilities pg 
+  runReaderT deleteFacilities pg
   mapConcurrently (loadAndInsert pg) [1,2]
+  runReaderT processFeatures pg
   return ()
 
 importFacilitiesWhitelists :: Postgres -> IO ()
@@ -73,6 +74,19 @@ loadAndInsert :: Postgres -> Int -> IO ()
 loadAndInsert conn i = do
   c <- loadCsv (filePath i)
   runReaderT (mapM_ insertFacility c) $ conn
-  
+
+processFeatures :: Db ()
+processFeatures = void $ execute_
+  [sql|
+    INSERT INTO park_feature (park_number, feature_id, coords)
+    SELECT
+      park_number,
+      'dog_off_leash_area',
+      ST_Centroid(ST_Collect(coords::geometry))::geography
+    FROM park_facility
+    WHERE node_use = 'DOG OFF LEASH NODE'
+    GROUP BY park_number;
+  |]
+
 filePath :: Int -> FilePath
 filePath i = "data/dataset_park_facilties_part_" ++ show i ++ ".csv"
