@@ -18,7 +18,7 @@
       <apply-content/>
 
     </div>
-    <div class="col-md-12">
+    <div class="col-md-12 text-center">
       <div class="row">
         This site uses CC-BY licensed data from Brisbane City Council.
         See the <a href="https://github.com/bfpg-govhack/govhack-brissy-parks">GitHub page</a>

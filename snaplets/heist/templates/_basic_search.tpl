@@ -16,8 +16,6 @@
     <div class="text-center">
       <h2>Search !</h2>
       <p class="lead">Start by typing a suburb.</p>
-      <br>
-      <p>Select from the list of features that are returned to narrow your search.</p>
 
     </div>
     <!-- Basic Text Area Search Form -->
@@ -33,8 +31,15 @@
 
       <input id="feature-form-list" name="features" value="" style="display:none;">
 
+      <div class="help-text">
+        <p>
+          Click on, or drag features to this section below to add them to your search
+        </p>
+      </div>
+      
       <div class="selected-fields">
-        <ul class="list-group feature-list well" id="sortable-features" name="features"> </ul>
+        <ul class="list-group feature-list well" id="sortable-features" name="features">
+        </ul>
       </div>
     </form>
   </div>

@@ -1,8 +1,13 @@
 <div class="container">
 
   <div class="row">
-    <div class="col-md-12">
+    <div class="col-md-6">
       <h2>Search Results</h2>
+    </div>
+    <div class="col-md-6">
+      <div class="pull-right">
+        <h4><a class="new-search" href="/">New Search?</a></h4>
+      </div>
     </div>
   </div>
 
@@ -34,7 +39,7 @@
 google.maps.event.addDomListener(window, 'load', function(){
   var map = brissyParks.initMap();
     var searchResults = brissyParks.readResults();
-    console.log(searchResults);
+
     if (searchResults.length > 0) {
       brissyParks.displayPark(map, searchResults[0]);
     }
