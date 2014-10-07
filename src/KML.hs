@@ -8,24 +8,12 @@ module KML
   , queryParkKML
   ) where
 
-import Control.Applicative ((<$>),(<*>))
-import Control.Error (headMay)
-import Control.Lens (_Wrapped,_Unwrapped,_Show,makeLenses,makeWrapped,(^.))
-import Control.Monad.Reader (ReaderT)
-import Data.Maybe (fromMaybe)
+import Control.Applicative ((<$>))
 import qualified Data.Text as T
-import Database.PostgreSQL.Simple (Connection)
-import Database.PostgreSQL.Simple.FromRow (FromRow,fromRow,field)
-import Database.PostgreSQL.Simple.ToRow (ToRow,toRow)
-import Database.PostgreSQL.Simple.ToField (ToField,toField)
-import Database.PostgreSQL.Simple.FromField (FromField,Conversion,fromField)
 import Database.PostgreSQL.Simple.SqlQQ (sql)
-import Snap.Snaplet.PostgresqlSimple (Postgres,Only(Only),fromOnly,query,query_,execute_)
+import Snap.Snaplet.PostgresqlSimple (Only(Only), fromOnly, query, query_)
 
 import Db.Internal
-
-tableName :: T.Text
-tableName = "osm_park_ll"
 
 queryParkNos :: Db [Integer]
 queryParkNos = fmap fromOnly <$> query_

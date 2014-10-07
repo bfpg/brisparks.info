@@ -51,7 +51,7 @@ Executable app
     -- warnings.  The hint library doesn't give an option to execute
     -- compiled code when there were also warnings, so disabling
     -- warnings allows quicker workflow.
-    ghc-options: -threaded -w
+    ghc-options: -threaded -w -Wall
   else
     ghc-options: -threaded -Wall -fwarn-tabs -funbox-strict-fields -O2
                  -fno-warn-orphans -fno-warn-unused-do-bind
@@ -75,4 +75,4 @@ Executable import
     , postgresql-simple
     , vector
 
-  ghc-options: -threaded -O2
+  ghc-options: -threaded -O2 -Wall

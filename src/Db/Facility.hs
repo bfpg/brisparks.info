@@ -5,26 +5,18 @@ module Db.Facility where
 
 import Control.Applicative ((<$>),(<*>))
 import Control.Error (headMay)
-import Control.Lens (_Wrapped,_Unwrapped,_Show,makeLenses,makeWrapped,(^.))
-import Control.Monad (mfilter)
-import Control.Monad.Reader (ReaderT)
-import Data.Aeson (ToJSON,FromJSON,toJSON,parseJSON)
+import Control.Lens (makeLenses, (^.))
+import Control.Monad (mfilter, void)
 import Data.Aeson.TH (deriveJSON)
 import Data.Bifunctor (first)
-import Data.ByteString.Char8 (unpack)
-import Data.Foldable(fold)
 import Data.List (nub)
-import Data.Maybe (fromMaybe,isNothing) 
 import Data.Text (Text)
 import qualified Data.Text as T
-import Data.Traversable (sequenceA,traverse)
-import Database.PostgreSQL.Simple (Connection,(:.)(..))
 import Database.PostgreSQL.Simple.FromRow (FromRow,fromRow,field)
 import Database.PostgreSQL.Simple.ToRow (ToRow,toRow)
-import Database.PostgreSQL.Simple.ToField (ToField,toField)
-import Database.PostgreSQL.Simple.FromField (FromField,Conversion,fromField)
+import Database.PostgreSQL.Simple.ToField (toField)
 import Database.PostgreSQL.Simple.SqlQQ (sql)
-import Snap.Snaplet.PostgresqlSimple (In(..),Postgres,Only(Only),fromOnly,query,query_,execute_)
+import Snap.Snaplet.PostgresqlSimple (In(..),Only(Only),fromOnly,query,query_,execute_)
 
 import Db.Internal
 
@@ -58,10 +50,10 @@ makeLenses ''ParkResult
 deriveJSON (aesonThOptions (Just "_parkResult")) ''ParkResult
 
 deleteFacilities :: Db ()
-deleteFacilities = execute_ "TRUNCATE park_facility" >> return ()
+deleteFacilities = void $ execute_ "TRUNCATE park_facility"
 
 insertFacility :: Facility -> Db Int
-insertFacility f = fromMaybe 0 . fmap fromOnly . headMay <$> query
+insertFacility f = maybe 0 fromOnly . headMay <$> query
   [sql|
    INSERT INTO park_facility (
      park_number,park_name,node_id,node_use,node_name,item_id,item_type,item_name,
@@ -120,7 +112,7 @@ searchParkAdjoiningSuburbs st = query
   (Only $ searchTerm st)
 
 parkFeatures :: Text -> [Text] -> [Text] -> Db [Text]
-parkFeatures st nodeUses itemTypes = nub . (explode =<<) <$> query
+parkFeatures st _ _ = nub . (explode =<<) <$> query
   [sql|
    SELECT DISTINCT f.node_use, f.item_type
    FROM park_facility f
@@ -155,7 +147,7 @@ searchPark f st = maybe noFeatureQ withFeaturesQ . mfilter null $ f
      |]
      (searchTerm st, searchTerm st,In fs, In fs)
 getFacilities :: Int -> Db [Facility]
-getFacilities id = query
+getFacilities parkId = query
    [sql|
      SELECT 
        park_number,park_name,node_id,node_use,node_name,item_id,item_type,item_name,
@@ -163,7 +155,9 @@ getFacilities id = query
      FROM park_facility f
      WHERE f.park_number = ?
      |]
-   (Only id)
+   (Only parkId)
+
+searchTerm :: Text -> Text
 searchTerm st = T.concat ["%",st,"%"]
 
 instance FromRow Facility where
@@ -210,4 +204,5 @@ instance ToRow Facility where
     ]
     where
       coordText :: (CsvDouble,CsvDouble) -> String
-      coordText (CsvDouble(long),CsvDouble(lat)) = "POINT(" ++ show long ++ " " ++ show lat ++ ")"
+      coordText (CsvDouble long, CsvDouble lat) =
+        "POINT(" ++ show long ++ " " ++ show lat ++ ")"

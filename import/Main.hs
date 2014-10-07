@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings, TupleSections #-}
 module Main where
 
-import Control.Error (Script,runScript,scriptIO)
+import Control.Error (runScript, scriptIO)
 import Control.Concurrent.Async (Concurrently(..))
 import Control.Monad
 import Data.Configurator (subconfig)
@@ -24,21 +24,20 @@ import ParkAddressesImport
 main :: IO ()
 main = runScript $ do
   (pg, conninfo) <- scriptIO $ conf >>= getPostgres
-  _ <- scriptIO . runConcurrently . traverse Concurrently $
+  void $ scriptIO $ runConcurrently $ traverse Concurrently
     [ importFacilities pg
     , importAdjoiningSuburbs pg
     , importParkAddresses pg
     , importFacilitiesWhitelists pg
     , importKml conninfo
     ]
-  return ()
 
 conf :: IO Config
 conf = loadAppConfig "devel.cfg" "."
 
 getPostgres :: Config -> IO (Postgres, B.ByteString)
-getPostgres conf = do
-  s <- getConnectionString . subconfig "postgresql-simple" $ conf
+getPostgres c = do
+  s <- getConnectionString $ subconfig "postgresql-simple" c
   p <- createPool (connectPostgreSQL s) close 1 10 5
   return (Postgres p, s)
 

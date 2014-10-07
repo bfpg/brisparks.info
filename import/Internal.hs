@@ -4,8 +4,7 @@ import qualified Data.ByteString as BS
 import qualified Data.ByteString.Char8 as BS8
 import qualified Data.ByteString.Lazy as LBS
 import Data.Char (isDigit)
-import Data.Csv (FromField,parseField)
-import Data.Csv (FromNamedRecord,decodeByName)
+import Data.Csv (FromField, parseField, FromNamedRecord, decodeByName)
 import Data.Vector (toList)
 
 import Db.Internal
@@ -23,4 +22,4 @@ loadCsv fn = do
   c <- fmap LBS.fromStrict . BS.readFile $ fn
   case decodeByName c of
     Left err -> error $ "Csv Parse Failed: " ++ err
-    Right c  -> return . toList . snd $ c
+    Right c' -> return $ toList $ snd c'

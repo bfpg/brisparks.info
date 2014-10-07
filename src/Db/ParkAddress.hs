@@ -4,19 +4,16 @@
 module Db.ParkAddress where
 
 import Control.Applicative ((<$>),(<*>))
-import Control.Error (headMay)
+import Control.Monad (void)
 import Control.Lens ((^.),makeLenses)
-import Data.Maybe (fromMaybe) 
 import Data.Text (Text)
-import Database.PostgreSQL.Simple (Connection)
 import Database.PostgreSQL.Simple.FromRow (FromRow,fromRow,field)
 import Database.PostgreSQL.Simple.ToRow (ToRow,toRow)
-import Database.PostgreSQL.Simple.ToField (ToField,toField)
-import Database.PostgreSQL.Simple.FromField (FromField,Conversion,fromField)
+import Database.PostgreSQL.Simple.ToField (toField)
 import Database.PostgreSQL.Simple.SqlQQ (sql)
-import Snap.Snaplet.PostgresqlSimple (Only(Only),fromOnly,query,execute,execute_)
+import Snap.Snaplet.PostgresqlSimple (execute, execute_)
 
-import Db.Internal  
+import Db.Internal
 
 data ParkAddress = ParkAddress
   { _parkNumber        :: CsvInt
@@ -28,10 +25,10 @@ data ParkAddress = ParkAddress
   , _parkAddyLatitude  :: CsvDouble
   , _parkAddyLongtitude :: CsvDouble
   } deriving (Eq,Show)
-makeLenses ''ParkAddress             
+makeLenses ''ParkAddress
 
 deleteParkAddresses :: Db ()
-deleteParkAddresses = execute_ "TRUNCATE park_address" >> return ()
+deleteParkAddresses = void $ execute_ "TRUNCATE park_address"
 
 insertParkAddress :: ParkAddress -> Db ()
 insertParkAddress a = const () <$> execute

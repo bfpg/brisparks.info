@@ -10,17 +10,13 @@ module Site
 
 ------------------------------------------------------------------------------
 import           Control.Applicative
-import           Control.Monad (mfilter)
 import           Control.Monad.Reader (runReaderT)
-import           Control.Monad.State (gets)
 import           Data.Aeson
 import           Data.ByteString (ByteString)
 import qualified Data.ByteString as BS
 import qualified Data.ByteString.Char8 as B8
 -- Aeson's "encode" to json generates lazy bytestrings
-import qualified Data.ByteString.Lazy.Char8 as BSL
 import qualified Data.Configurator as C
-import           Data.Maybe (maybe)
 import Data.List.Split (splitOn)
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as T
@@ -31,7 +27,7 @@ import           Snap.Snaplet.Heist
 import           Snap.Util.FileServe
 import           Heist
 import qualified Heist.Interpreted as I
-import           Snap.Snaplet.PostgresqlSimple (Postgres,pgsInit,getPostgresState)
+import           Snap.Snaplet.PostgresqlSimple (pgsInit, getPostgresState)
 ------------------------------------------------------------------------------
 import           Application
 
@@ -58,7 +54,7 @@ parkResultSplice p = do
     splice a f = a ## I.textSplice $ f p
 
 parkResultsSplice :: [ParkResult] -> I.Splice AppHandler
-parkResultsSplice parks = I.mapSplices (I.runChildrenWith . parkResultSplice) parks
+parkResultsSplice = I.mapSplices (I.runChildrenWith . parkResultSplice)
 
 handleApiSearch :: AppHandler ()
 handleApiSearch = do
@@ -99,7 +95,7 @@ httpErrorJson status statusMsg msg = do
   getResponse >>= finishWith
 
 require :: String -> Maybe a -> AppHandler a
-require s x = case x of
+require _ x = case x of
   Nothing -> httpErrorJson 404 "Not Found" "no kml for given id"
   Just a -> return a
 
@@ -132,6 +128,6 @@ app = makeSnaplet "app" "An snaplet example application." Nothing $ do
     h <- nestSnaplet "" heist $ heistInit "templates"
     d <- nestSnaplet "db" db pgsInit
     c <- getSnapletUserConfig
-    baseUrl <- liftIO $ C.require c "baseUrl"
+    url <- liftIO $ C.require c "baseUrl"
     addRoutes routes
-    return $ App h d baseUrl
+    return $ App h d url

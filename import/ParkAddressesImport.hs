@@ -3,14 +3,10 @@
 module ParkAddressesImport where
 
 import Control.Applicative ((<$>),(<*>))
-import Control.Error (Script,left,runScript,scriptIO)
-import Control.Monad.Reader (runReaderT)
-import Data.Csv (FromNamedRecord,ToNamedRecord,FromField,decodeByName,parseField
-  ,encodeByName,namedRecord,parseNamedRecord,toNamedRecord,(.=),(.:))
-import Data.Text (Text)
+import Control.Monad.Reader (runReaderT, void)
+import Data.Csv (FromNamedRecord, parseNamedRecord,(.:))
 import Snap.Snaplet.PostgresqlSimple (Postgres)
 
-import Db.Internal
 import Db.ParkAddress
 import Internal
 
@@ -27,7 +23,6 @@ instance FromNamedRecord ParkAddress where
 
 importParkAddresses :: Postgres -> IO ()
 importParkAddresses pg = do
-  runReaderT deleteParkAddresses pg 
+  runReaderT deleteParkAddresses pg
   c <- loadCsv "data/parks_with_suburb_info.csv"
-  runReaderT (mapM_ insertParkAddress c) $ pg
-  return ()
+  void $ runReaderT (mapM_ insertParkAddress c) pg

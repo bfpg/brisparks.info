@@ -6,14 +6,8 @@ module FacilitiesImport where
 import Control.Applicative ((<$>),(<*>))
 import Control.Monad (void)
 import Control.Concurrent.Async (mapConcurrently)
-import Control.Error (Script,left,runScript,scriptIO)
 import Control.Monad.Reader (runReaderT)
-import qualified Data.ByteString.Char8 as BS8
-import Data.Char
-import Data.Csv (FromNamedRecord,ToNamedRecord,FromField,decodeByName,parseField
-  ,encodeByName,namedRecord,parseNamedRecord,toNamedRecord,(.=),(.:))
-import Database.PostgreSQL.Simple (connectPostgreSQL,close,SqlError)
-import Snap.Snaplet (loadAppConfig)
+import Data.Csv (FromNamedRecord,parseNamedRecord,(.:))
 import Snap.Snaplet.PostgresqlSimple
 import Database.PostgreSQL.Simple.SqlQQ (sql)
 
@@ -40,9 +34,8 @@ instance FromNamedRecord Facility where
 importFacilities :: Postgres -> IO ()
 importFacilities pg = do
   runReaderT deleteFacilities pg
-  mapConcurrently (loadAndInsert pg) [1,2]
-  runReaderT processFeatures pg
-  return ()
+  _ <- mapConcurrently (loadAndInsert pg) [1,2]
+  void $ runReaderT processFeatures pg
 
 importFacilitiesWhitelists :: Postgres -> IO ()
 importFacilitiesWhitelists db = do
@@ -73,7 +66,7 @@ insertNodeUseWhitelist s = void $ execute
 loadAndInsert :: Postgres -> Int -> IO ()
 loadAndInsert conn i = do
   c <- loadCsv (filePath i)
-  runReaderT (mapM_ insertFacility c) $ conn
+  runReaderT (mapM_ insertFacility c) conn
 
 processFeatures :: Db ()
 processFeatures = void $ execute_
